@@ -1,0 +1,17 @@
+class Item{
+  final int id;
+  final String name;
+  final String description;
+  final double price;
+  final String image; // Placeholder for asset path
+  bool isFav;
+
+  Item({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.image,
+    this.isFav = false,
+  });
+}
