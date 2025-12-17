@@ -21,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Item(id: 2, name: "Paneer Tikka", description: "Grilled chunks of paneer marinated in spicy yogurt.", price: 15.0, image: ""),
     Item(id: 3, name: "Spinach Croissants", description: "Flaky croissants stuffed with spinach and cheese.", price: 8.0, image: ""),
     Item(id: 4, name: "Vegetable Samosas", description: "Crisp pastry pockets filled with spiced veggies.", price: 5.0, image: ""),
-    // Thode aur items add karna taaki grid achha dikhe
     Item(id: 5, name: "Mojito", description: "Fresh mint lime soda.", price: 4.0, image: ""),
   ];
 
@@ -46,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _drawerKey,
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: SafeArea(
@@ -61,18 +60,16 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-            // YAHAN HAI MAGIC 🪄
+            // YAHAN CHANGE KIYA HAI 🪄
             Expanded(
-              child:ResponsiveDiffLayout (
-                MobileBody: _buildMobileList(),
-                TabletBody: _buildTabletGrid(),
+              child: ResponsiveDiffLayout(
+                // Mobile aur Tablet dono ke liye ab ListView (List) hi use hoga
+                MobileBody: _buildList(isTablet: false),
+                TabletBody: _buildList(isTablet: true),
               ),
             ),
-
           ],
-
         ),
-
       ),
       bottomNavigationBar: SafeArea(
         bottom: true,
@@ -83,11 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
-
     );
-
   }
-
 
   OverlayEntry? _overlayEntry;
 
@@ -116,7 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Row(
               children: [
-                // 1. White Circle Icon
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: const BoxDecoration(
@@ -126,8 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Icon(Icons.check, color: Color(0xFF10C66F), size: 18),
                 ),
                 const SizedBox(width: 12),
-
-                // 2. Text Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "Thank you for shoping with us! Your food will arrive soon Enjoy.",
+                        "Thank you for shopping with us! Your food will arrive soon Enjoy.",
                         style: GoogleFonts.nunito(
                           color: Colors.white,
                           fontSize: 11,
@@ -154,16 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-
-                // 3. Close Button (X)
                 GestureDetector(
                   onTap: () {
                     _overlayEntry?.remove();
                     _overlayEntry = null;
                   },
-                  child: IconButton(onPressed:(){
-                    _overlayEntry?.remove();
-                  },icon: const Icon(Icons.close, color: Colors.white, size: 20)),
+                  child: const Icon(Icons.close, color: Colors.white, size: 20),
                 ),
               ],
             ),
@@ -172,40 +159,21 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // Screen par dikhao
     Overlay.of(context).insert(_overlayEntry!);
 
-    // 3 Second baad apne aap hata do
     Future.delayed(const Duration(seconds: 3), () {
       _overlayEntry?.remove();
       _overlayEntry = null;
     });
   }
 
-  Widget _buildMobileList() {
+  Widget _buildList({required bool isTablet}) {
     return ListView.builder(
-      padding: const EdgeInsets.only(top:0,bottom: 55),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return ItemCard(
-          item: item,
-          quantity: cart[item.id] ?? 0,
-          onQuantityChanged: (change) => _updateCart(item.id, change),
-        );
-      },
-    );
-  }
-
-
-  Widget _buildTabletGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1.1,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
+      padding: EdgeInsets.only(
+          top: 0,
+          bottom: 55,
+          left: isTablet ? 16 : 0,
+          right: isTablet ? 16 : 0
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -218,7 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(

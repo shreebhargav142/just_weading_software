@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-// Make sure yeh path sahi ho jahan aapne file save ki hai
 import 'package:just_weding_software/widgets/responsive_layout.dart';
 
 class CategoryList extends StatefulWidget {
@@ -22,21 +21,18 @@ class _CategoryListState extends State<CategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    // YAHAN HUMNE AAPKA WIDGET USE KIYA HAI
     return ResponsiveDiffLayout(
       MobileBody: _buildCategoryList(isTablet: false),
       TabletBody: _buildCategoryList(isTablet: true),
     );
   }
 
-  // Ek common function jo Tablet aur Mobile dono ke liye list banayega
-  // Bas sizes 'isTablet' ke hisaab se badal jayenge
+
   Widget _buildCategoryList({required bool isTablet}) {
 
-    // --- Dynamic Sizes ---
     double containerHeight = isTablet ? 160 : 125;
     double circleSize = isTablet ? 85 : 65;
-    double fontSize = isTablet ? 16 : 13;
+    double fontSize = isTablet ? 16 : 11;
     double itemSpacing = isTablet ? 35 : 20;
     double paddingX = isTablet ? 30 : 15;
     double borderWidth = isTablet ? 3 : 2;
@@ -60,7 +56,6 @@ class _CategoryListState extends State<CategoryList> {
             },
             child: Column(
               children: [
-                // 1. Circle Avatar Box
                 Container(
                   height: circleSize,
                   width: circleSize,
@@ -76,8 +71,6 @@ class _CategoryListState extends State<CategoryList> {
                     backgroundColor: Colors.white,
                   ),
                 ),
-
-                const SizedBox(height: 8),
 
                 Text(
                   widget.categories[index],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:just_weding_software/Home/home_screen.dart';
 import '../widgets/responsive_layout.dart'; // Apna responsive file import karein
 
 class FeedbackSuccessScreen extends StatelessWidget {
@@ -92,7 +93,7 @@ class FeedbackSuccessScreen extends StatelessWidget {
               width: buttonWidth,
               height: buttonHeight,
               child: OutlinedButton.icon(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen())),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: _borderColor),
                   shape: RoundedRectangleBorder(

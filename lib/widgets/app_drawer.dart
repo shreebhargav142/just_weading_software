@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/screens/feedback_screen.dart';
+import 'package:just_weding_software/screens/order_history_screen.dart';
 import '../Home/home_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -89,7 +90,12 @@ class _AppDrawerState extends State<AppDrawer> {
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
                             fontSize: 14.8)),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const OrderHistoryScreen()));
+                    },
                   ),
                   ListTile(
                     leading: const Icon(Icons.star_border, color: Colors.black),
@@ -231,7 +237,7 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               onTap: () {},
             ),
-            const SizedBox(height: 20), // Bottom padding
+            const SizedBox(height: 40), // Bottom padding
           ],
         ),
       ),
