@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="just_weding_software"
+        android:label="Just Wedding Software"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

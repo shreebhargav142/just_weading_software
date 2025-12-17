@@ -17,10 +17,8 @@ class _AppDrawerState extends State<AppDrawer> {
     return Drawer(
       child: Container(
         color: Colors.white,
-        // CHANGE 1: ListView ko Column mein badla
         child: Column(
           children: [
-            // CHANGE 2: Saare scrollable items ko Expanded -> ListView mein dala
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
@@ -31,7 +29,6 @@ class _AppDrawerState extends State<AppDrawer> {
                       children: [
                         Image.asset(
                           'assets/icon/icon.png',
-                          color: Colors.blue,
                           height: 92,
                           width: 73,
                         ),
@@ -51,7 +48,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               Text(
                                 '@manager123',
                                 style: GoogleFonts.nunito(
-                                    color: const Color(0xFF23232399),
+                                    color: Colors.black45,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400),
                               )
@@ -225,7 +222,6 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             // CHANGE 4: Logout Button ko ListView ke bahar, Column ke bottom mein rakha
-            const Divider(),
             ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),
               title: Text(

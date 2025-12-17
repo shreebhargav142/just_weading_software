@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ResponsiveScreen extends StatelessWidget {
   final Widget child;
-  final double maxWidth; // Maximum width content should take
+  final double maxWidth;
   final EdgeInsetsGeometry padding;
 
   const ResponsiveScreen({
@@ -18,7 +18,7 @@ class ResponsiveScreen extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: maxWidth, // Content isse zyada nahi phailega
+          maxWidth: maxWidth,
         ),
         child: Padding(
           padding: padding,

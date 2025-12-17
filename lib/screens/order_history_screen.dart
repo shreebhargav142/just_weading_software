@@ -66,117 +66,139 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   // 1. MOBILE VIEW (Beautiful Card List)
   // ==========================================
   Widget _buildMobileList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _orders.length,
-      itemBuilder: (context, index) {
-        final order = _orders[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        // --- YOUR NEW TEXT HERE ---
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0), // Thoda padding diya taaki chipke nahi
+          child: Text(
+
+            'Total Orders: ${_orders.length}',
+            style: GoogleFonts.nunito(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.black87
+            ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Order ID and Date
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "#${order['id']}",
-                      style: GoogleFonts.nunito(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      order['date']!.split('-')[0].trim(), // Only Date
-                      style: GoogleFonts.nunito(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                        fontWeight: FontWeight.w600,
-                      ),
+        ),
+
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _orders.length,
+            itemBuilder: (context, index) {
+              final order = _orders[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-
-                // Divider line
-                Divider(color: Colors.grey[100], height: 1),
-                const SizedBox(height: 12),
-
-                Row(
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.blue[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.receipt_long_rounded, color: Colors.blue, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header: Order ID and Date
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            order['items'] ?? "Items",
+                            "#${order['id']}",
                             style: GoogleFonts.nunito(
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              color: Colors.black87,
                             ),
                           ),
                           Text(
-                            order['date']!.split('-')[1].trim(), // Time
+                            order['date']!.split('-')[0].trim(), // Only Date
                             style: GoogleFonts.nunito(
                               fontSize: 12,
                               color: Colors.grey[500],
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 8),
 
-                    // Status Badge
-                    StatusBadge(status: order['status']!),
-                  ],
-                ),
+                      // Divider line
+                      Divider(color: Colors.grey[100], height: 1),
+                      const SizedBox(height: 12),
 
-                const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.receipt_long_rounded, color: Colors.blue, size: 20),
+                          ),
+                          const SizedBox(width: 12),
 
-                SizedBox(
-                  width: double.infinity,
-                  height: 36,
-                  child: OutlinedButton(
-                    onPressed: (){},
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text("View Details", style: GoogleFonts.nunito(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600)),
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  order['items'] ?? "Items",
+                                  style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Text(
+                                  order['date']!.split('-')[1].trim(), // Time
+                                  style: GoogleFonts.nunito(
+                                    fontSize: 12,
+                                    color: Colors.grey[500],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Status Badge
+                          StatusBadge(status: order['status']!),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 36,
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Text("View Details", style: GoogleFonts.nunito(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600)),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:just_weding_software/initial_screen/splash.dart';
 
 void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

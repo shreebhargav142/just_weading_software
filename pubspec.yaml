@@ -39,6 +39,9 @@ dependencies:
   google_fonts: ^6.3.2
   step_progress_indicator: ^1.0.2
   intl: ^0.20.2
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: "^2.4.3"
+
 
 dev_dependencies:
   flutter_test:
@@ -51,10 +54,29 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+  windows:
+    generate: true
+  macos:
+    generate: true
+  image_path: "assets/icon/icon.png"
+
+flutter_native_splash:
+  color: Colors.white
+  image: "assets/icon/icon.png" # Splash screen ke beech ka image
+  branding: "assets/icon/icon.png" # Android 12+ ke liye
+  fullscreen: true
+  android: true
+  ios: true
+
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter packages.
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -66,10 +88,6 @@ flutter:
   assets:
     - assets/icon/
     - assets/images/
-    - assets/images/logo/
-    - assets/images/initial_images/init_royal.png
-    - assets/images/initial_images/more_btn.png
-    - assets/images/initial_images/unmatched.png
-    - assets/images/initial_images/init_support.png
+
 
 
