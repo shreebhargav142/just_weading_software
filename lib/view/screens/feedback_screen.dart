@@ -153,7 +153,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         const SizedBox(height: 15),
         Row(
           children: [
-            Text("Worst", style: TextStyle(color: Colors.grey[600], fontSize: 13)),
             const SizedBox(width: 10),
             Expanded(
               child: Row(
@@ -183,7 +182,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            const Text("Best", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           ],
         ),
       ],

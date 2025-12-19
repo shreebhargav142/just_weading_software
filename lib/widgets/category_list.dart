@@ -57,7 +57,7 @@ class _CategoryListState extends State<CategoryList> {
 
   Widget _buildVerticalList() {
     return Container(
-      width: 90,
+      width: 70,
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: ListView.separated(
@@ -80,8 +80,8 @@ class _CategoryListState extends State<CategoryList> {
       child: Column(
         children: [
           Container(
-            height: 60,
-            width: 65,
+            height: 40,
+            width: 55,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -96,7 +96,7 @@ class _CategoryListState extends State<CategoryList> {
                   ? NetworkImage(category.menuImage!)
                   : null,
               child: category.menuImage == null || category.menuImage!.isEmpty
-                  ? Icon(Icons.fastfood, color: Colors.grey[400], size: 20)
+                  ? Icon(Icons.fastfood, color: Colors.grey[400], size: 18)
                   : null,
             ),
           ),
@@ -107,7 +107,7 @@ class _CategoryListState extends State<CategoryList> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.nunito(
-              fontSize: 11,
+              fontSize: 9,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               color: isSelected ? Colors.black : Colors.grey[600],
             ),

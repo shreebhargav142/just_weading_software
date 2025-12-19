@@ -41,6 +41,7 @@ class _ItemCardState extends State<ItemCard> {
             child: Stack(
               children: [
                 Container(
+                  height: 80,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
@@ -88,23 +89,12 @@ class _ItemCardState extends State<ItemCard> {
                 children: [
                   Text(
                     widget.item.name,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.nunito(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.item.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.nunito(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                      height: 1.2,
                     ),
                   ),
                 ],
@@ -117,7 +107,7 @@ class _ItemCardState extends State<ItemCard> {
             child: widget.quantity == 0
                 ? SizedBox(
               width: double.infinity,
-              height: 36,
+              height: 34,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD32F2F),
@@ -140,14 +130,13 @@ class _ItemCardState extends State<ItemCard> {
             )
                 : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+
               children: [
-                InkWell(
-                  onTap: () => widget.onQuantityChanged(-widget.quantity), // Remove all
-                  child: const Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: Icon(Icons.delete_outline, color: Color(0xFFD32F2F), size: 22),
-                  ),
-                ),
+                // InkWell(
+                //   onTap: () => widget.onQuantityChanged(-widget.quantity), // Remove all
+                //   child: Icon(Icons.delete_outline, color: Color(0xFFD32F2F), size: 18),
+                // ),
 
                 Container(
                   height: 32,
@@ -156,25 +145,34 @@ class _ItemCardState extends State<ItemCard> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min, // Yeh Row ko sirf utni jagah lene dega jitni zaroorat hai
                     children: [
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 18,
                         icon: const Icon(Icons.remove, size: 16, color: Colors.black87),
                         onPressed: () => widget.onQuantityChanged(-1),
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 30, minHeight: 32),
+                        // Constraints ko thoda aur tight karein
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                       ),
-                      Text(
-                        "${widget.quantity}",
-                        style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          "${widget.quantity}",
+                          style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                       IconButton(
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 18,
                         icon: const Icon(Icons.add, size: 16, color: Colors.black87),
                         onPressed: () => widget.onQuantityChanged(1),
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 30, minHeight: 32),
+                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                       ),
                     ],
                   ),

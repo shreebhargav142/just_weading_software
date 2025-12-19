@@ -17,7 +17,7 @@ class ApiService {
       body: jsonEncode(body),
     );
   }
-    //2 Get MenuCategory
+
   static Future<http.Response> getMenuCategory(int clientId) async {
     try {
 
