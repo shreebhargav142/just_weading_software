@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:just_weding_software/screens/feedback_success_screen.dart';
 import 'package:just_weding_software/widgets/feedback_textfield.dart';
-import '../widgets/responsive_layout.dart'; // Make sure path is correct
+
+import '../../widgets/responsive_layout.dart';
+import 'feedback_success_screen.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -45,7 +46,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      // YAHAN HUMNE RESPONSIVE LAYOUT USE KIYA HAI
       body: SafeArea(
         child: ResponsiveDiffLayout(
           MobileBody: _buildMobileLayout(),

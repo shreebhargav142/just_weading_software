@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/widgets/responsive_layout.dart';
-import '../screens/order_history_screen.dart';
+
+import '../view/screens/order_history_screen.dart';
 
 class CartBottomBar extends StatefulWidget {
   final int totalItems;

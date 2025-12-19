@@ -3,7 +3,7 @@ class Item{
   final String name;
   final String description;
   final double price;
-  final String image; // Placeholder for asset path
+  final String image;
   bool isFav;
 
   Item({

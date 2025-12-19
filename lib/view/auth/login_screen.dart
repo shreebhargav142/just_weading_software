@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide ResponsiveScreen;
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/widgets/responsive_screen.dart';
-import '../Home/home_screen.dart';
+import '../../controller/auth_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final authController = Get.put(AuthController());
   bool isPasswordVisible = false;
 
   @override
@@ -58,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.black,
                       fontSize: 16,
                     ),
+                    controller: authController.usernameController,
                     cursorColor: Colors.black,
                     decoration: InputDecoration(
                       filled: true,
@@ -98,6 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.black,
                       fontSize: 16,
                     ),
+                    controller: authController.passwordController,
                     obscureText: !isPasswordVisible,
                     keyboardType: TextInputType.visiblePassword,
                     textInputAction: TextInputAction.done,
@@ -158,24 +163,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => HomeScreen()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade700,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12))),
-                        child: Text(
-                          'Login Now',
-                          style: GoogleFonts.nunito(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white),
-                        )),
+                    child: Obx((){
+                      if(authController.isLoading.value){
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return ElevatedButton(
+                          onPressed: () {
+                            authController.login();
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.shade700,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12))),
+                          child: Text(
+                            'Login Now',
+                            style: GoogleFonts.nunito(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white),
+                          ));
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -185,4 +193,5 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
 }

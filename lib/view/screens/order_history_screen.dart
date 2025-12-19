@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/responsive_layout.dart';
-import '../widgets/status_badge.dart';
+
+import '../../widgets/responsive_layout.dart';
+import '../../widgets/status_badge.dart';
+
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -256,7 +258,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               }).toList(),
             ),
 
-            // Pagination Controls (Only for Tablet)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Row(

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_weding_software/Home/home_screen.dart';
-import '../widgets/responsive_layout.dart'; // Apna responsive file import karein
+import 'package:just_weding_software/view/home_screen.dart';
+
+import '../../widgets/responsive_layout.dart';
 
 class FeedbackSuccessScreen extends StatelessWidget {
   const FeedbackSuccessScreen({super.key});
 
-  // Colors as per Image
   static const Color _iconBgColor = Color(0xFFE0F2F1); // Light green
   static const Color _themeColor = Color(0xFF00C853); // Main green
   static const Color _textColor = Color(0xFF757575); // Grey text
@@ -28,9 +28,7 @@ class FeedbackSuccessScreen extends StatelessWidget {
     );
   }
 
-  // --- REUSABLE CONTENT BUILDER ---
   Widget _buildContent(BuildContext context, {required bool isTablet}) {
-    // Tablet ke liye sizes adjust karte hain
     double iconSize = isTablet ? 150 : 100;
     double iconInnerSize = isTablet ? 60 : 40;
     double titleSize = isTablet ? 32 : 22;

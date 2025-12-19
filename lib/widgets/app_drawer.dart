@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_weding_software/screens/feedback_screen.dart';
-import 'package:just_weding_software/screens/order_history_screen.dart';
-import '../Home/home_screen.dart';
+import 'package:just_weding_software/view/auth/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../view/home_screen.dart';
+import '../view/screens/feedback_screen.dart';
+import '../view/screens/order_history_screen.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -12,6 +15,57 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
+  String companyName = "";
+  String profileImage = "";
+  String managerName = "@manager123";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    print("DEBUG: Loading User Data...");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? userData = prefs.getString('userData');
+
+    print("DEBUG: Raw JSON from Prefs: $userData");
+
+    if (userData != null) {
+      try {
+        Map<String, dynamic> userMap = jsonDecode(userData);
+        var details = userMap['data']['clientUserDetails'][0];
+
+        if (userMap['data'] != null &&
+            userMap['data']['clientUserDetails'] != null &&
+            (userMap['data']['clientUserDetails'] as List).isNotEmpty) {
+
+          String nameFromApi = userMap['data']['clientUserDetails'][0]['companyName'] ?? "";
+          String userFromApi = userMap['data']['clientUserDetails'][0]['companyEmail'] ?? "manager";
+          String imageFromApi = userMap['data']['clientUserDetails'][0]['imgUrl'] ?? "assets/icon/icon.png";
+
+
+
+          print("DEBUG: Extracted Company Name: $nameFromApi");
+
+          setState(() {
+            companyName = nameFromApi;
+            managerName = userFromApi;
+            profileImage = imageFromApi;
+          });
+        } else {
+          print("DEBUG: No data found in 'data' or 'clientUserDetails'");
+        }
+      } catch (e) {
+        print("DEBUG ERROR: Data parsing failed: $e");
+      }
+    } else {
+      print("DEBUG: No saved data found (userData is null)");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -27,26 +81,39 @@ class _AppDrawerState extends State<AppDrawer> {
                     decoration: const BoxDecoration(),
                     child: Row(
                       children: [
-                        Image.asset(
-                          'assets/icon/icon.png',
-                          height: 92,
-                          width: 73,
+                        Container(height: 80,width: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
                         ),
-                        const SizedBox(width: 20),
+                          clipBehavior: Clip.antiAlias,
+                          child: profileImage.isNotEmpty ? Image.network(
+                            profileImage,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(Icons.person, color: Colors.grey[400],size: 40,)
+                          ) : Image.asset('assets/icon/icon.png'),
+                        ),
+                        const SizedBox(width: 14),
                         Padding(
                           padding: const EdgeInsets.only(top: 48.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Manager Name",
-                                style: GoogleFonts.nunito(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold),
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  companyName.isEmpty ? "Welcome" : companyName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.nunito(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
                               Text(
-                                '@manager123',
+                                managerName,
                                 style: GoogleFonts.nunito(
                                     color: Colors.black45,
                                     fontSize: 14,
@@ -146,7 +213,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               color: Colors.black,
                               fontSize: 14.8),
                         ),
-                        const Spacer(), // Yeh Spacer chalega kyunki yeh Row mein hai
+                        const Spacer(),
                         Text(
                           'English',
                           style: GoogleFonts.nunito(
@@ -204,7 +271,7 @@ class _AppDrawerState extends State<AppDrawer> {
                               color: Colors.black,
                               fontSize: 14.8),
                         ),
-                        const Spacer(), // Yeh Spacer chalega kyunki yeh Row mein hai
+                        const Spacer(),
                         Text(
                           'V 1.2.0',
                           style: GoogleFonts.nunito(
@@ -216,12 +283,10 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                     onTap: () {},
                   ),
-                  // CHANGE 3: Yahan se 'Spacer()' hata diya kyunki ab zaroorat nahi
                 ],
               ),
             ),
 
-            // CHANGE 4: Logout Button ko ListView ke bahar, Column ke bottom mein rakha
             ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),
               title: Text(
@@ -231,9 +296,20 @@ class _AppDrawerState extends State<AppDrawer> {
                     color: Colors.red,
                     fontSize: 14.8),
               ),
-              onTap: () {},
+              onTap: () async {
+                print("DEBUG: Logging out...");
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // Data Clear
+                print("DEBUG: Data Cleared.");
+
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false
+                );
+              },
             ),
-            const SizedBox(height: 40), // Bottom padding
+            const SizedBox(height: 40),
           ],
         ),
       ),

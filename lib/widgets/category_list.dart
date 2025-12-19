@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_weding_software/widgets/responsive_layout.dart';
+
+import '../controller/category_controller.dart';
+import '../model/category_model.dart';
 
 class CategoryList extends StatefulWidget {
-  final List<String> categories;
-  final Function(int) onCategorySelected;
+  final Function(MenuCategoryDetails) onCategorySelected;
+  final bool isSidebar;
 
   const CategoryList({
     super.key,
-    required this.categories,
     required this.onCategorySelected,
+    this.isSidebar = false,
   });
 
   @override
@@ -17,84 +20,109 @@ class CategoryList extends StatefulWidget {
 }
 
 class _CategoryListState extends State<CategoryList> {
+  final CategoryController controller = Get.put(CategoryController());
   int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveDiffLayout(
-      MobileBody: _buildCategoryList(isTablet: false),
-      TabletBody: _buildCategoryList(isTablet: true),
-    );
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: CircularProgressIndicator(color: Colors.red),
+        );
+      }
+
+      if (controller.categories.isEmpty) {
+        return const Center(child: Text("No categories found"));
+      }
+
+      return widget.isSidebar ? _buildVerticalList() : _buildHorizontalList();
+    });
   }
 
-
-  Widget _buildCategoryList({required bool isTablet}) {
-
-    double containerHeight = isTablet ? 160 : 125;
-    double circleSize = isTablet ? 85 : 65;
-    double fontSize = isTablet ? 16 : 11;
-    double itemSpacing = isTablet ? 35 : 20;
-    double paddingX = isTablet ? 30 : 15;
-    double borderWidth = isTablet ? 3 : 2;
-    double dotSize = isTablet ? 6 : 4;
-
+  Widget _buildHorizontalList() {
     return Container(
-      height: containerHeight,
+      height: 125,
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 15),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: paddingX),
-        itemCount: widget.categories.length,
-        separatorBuilder: (_, __) => SizedBox(width: itemSpacing),
-        itemBuilder: (context, index) {
-          bool isSelected = index == selectedIndex;
-          return GestureDetector(
-            onTap: () {
-              setState(() => selectedIndex = index);
-              widget.onCategorySelected(index);
-            },
-            child: Column(
-              children: [
-                Container(
-                  height: circleSize,
-                  width: circleSize,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected ? Colors.red : Colors.grey.shade300,
-                      width: borderWidth,
-                    ),
-                  ),
-                  child: const CircleAvatar(
-                    backgroundColor: Colors.white,
-                  ),
-                ),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        itemCount: controller.categories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 20),
+        itemBuilder: (context, index) => _buildCategoryItem(index),
+      ),
+    );
+  }
 
-                Text(
-                  widget.categories[index],
-                  style: GoogleFonts.nunito(
-                    fontSize: fontSize,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.black : Colors.grey[600],
-                  ),
-                ),
+  Widget _buildVerticalList() {
+    return Container(
+      width: 90,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ListView.separated(
+        itemCount: controller.categories.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 30),
+        itemBuilder: (context, index) => _buildCategoryItem(index),
+      ),
+    );
+  }
 
-                if (isSelected)
-                  Container(
-                    margin: const EdgeInsets.only(top: 6),
-                    height: dotSize,
-                    width: dotSize,
-                    decoration: const BoxDecoration(
-                        color: Colors.red, shape: BoxShape.circle),
-                  )
-                else
-                  SizedBox(height: dotSize + 6),
-              ],
+  Widget _buildCategoryItem(int index) {
+    final category = controller.categories[index];
+    final bool isSelected = index == selectedIndex;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => selectedIndex = index);
+        widget.onCategorySelected(category);
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 60,
+            width: 65,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected ? Colors.red : Colors.grey.shade300,
+                width: 2,
+              ),
             ),
-          );
-        },
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: category.menuImage != null && category.menuImage!.isNotEmpty
+                  ? NetworkImage(category.menuImage!)
+                  : null,
+              child: category.menuImage == null || category.menuImage!.isEmpty
+                  ? Icon(Icons.fastfood, color: Colors.grey[400], size: 20)
+                  : null,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            category.menuname ?? '',
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.nunito(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.black : Colors.grey[600],
+            ),
+          ),
+          if (isSelected)
+            Container(
+              margin: const EdgeInsets.only(top: 6),
+              height: 4,
+              width: 4,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
       ),
     );
   }
