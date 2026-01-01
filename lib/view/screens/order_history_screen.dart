@@ -6,6 +6,7 @@ import '../../controller/function_controller.dart';
 import '../../controller/order_history_controller.dart';
 import '../../model/function_model.dart';
 import '../../model/order_history_model.dart';
+import '../../utils/date_utils.dart';
 import '../../widgets/responsive_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -89,49 +90,214 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
-
-  // ------------------------------------------------------------
-  // FUNCTION SELECTOR
-  // ------------------------------------------------------------
   Widget _buildFunctionSelector(bool isTablet) {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: _openFunctionSelectorDialog,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "Select Function",
-            style: GoogleFonts.nunito(
-              fontSize: isTablet ? 16 : 14,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<FunctionManagerAssignDetails>(
-              isExpanded: true,
-              value: functionController.selectedFunction.value,
-              items: functionController.functionList.map((item) {
-                return DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.functionName ?? "",
-                    style: GoogleFonts.nunito(
-                      fontSize: isTablet ? 18 : 16,
-                    ),
+          Obx(() {
+            final f = functionController.selectedFunction.value;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Select Function",
+                  style: GoogleFonts.nunito(
+                    fontSize: 13,
+                    color: Colors.grey,
                   ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                functionController.onFunctionChanged(value);
-                historyController.fetchHistory(
-                    historyController.selectedTab.value);
-              },
-            ),
-          ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  f == null
+                      ? "Tap to choose"
+                      :"${f.functionName}",
+                  style: GoogleFonts.nunito(
+                    fontSize: isTablet ? 17 : 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            );
+          }),
+          const Icon(Icons.keyboard_arrow_down),
         ],
       ),
-    ));
+    );
+
   }
+  void _openFunctionSelectorDialog() {
+    final tempSelected =
+    Rx<FunctionManagerAssignDetails?>(
+      functionController.selectedFunction.value,
+    );
+
+    Get.dialog(
+      Center(
+        child: ResponsiveScreen(
+          maxWidth: MediaQuery.of(context).size.width >= 600 ? 600 : 360,
+          padding: const EdgeInsets.all(0),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Select Function",
+                      style: GoogleFonts.nunito(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(),
+
+                  Flexible(
+                    child: Obx(() => ListView.builder(
+                      shrinkWrap: true,
+                      itemCount:
+                      functionController.functionList.length,
+                      itemBuilder: (_, index) {
+                        final item =
+                        functionController.functionList[index];
+
+                        final isSelected =
+                            tempSelected.value?.functionId ==
+                                item.functionId;
+
+                        return InkWell(
+                          onTap: () => tempSelected.value = item,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            margin:
+                            const EdgeInsets.symmetric(vertical: 6),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 1,
+                                color: Colors.grey.shade200
+                              ),
+                              borderRadius:
+                              BorderRadius.circular(12),
+                              color:  Colors.white,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Event Name : ${item.eventName ?? ''}",
+                                        style: GoogleFonts.nunito(
+                                            fontWeight:
+                                            FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Function Name : ${item.functionName ?? ''}",
+                                        style:
+                                        GoogleFonts.nunito( fontWeight:
+                                        FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        "Date : ${formatDate(item.startTime)}",
+                                        style: GoogleFonts.nunito(
+                                            fontWeight: FontWeight.w600                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(Icons.check_circle,
+                                      color: Colors.green),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    )),
+                  ),
+
+                  const Divider(),
+                  const SizedBox(height: 8),
+
+                  // ---------- BUTTONS ----------
+                  Row(
+                    children: [
+                      Expanded(
+                        child:
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(8),
+                              side:  BorderSide(
+                                color: Colors.grey.shade200,
+                                width: 1,)
+                            ),
+                          ),
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: Text(
+                            "Close",
+                            style: TextStyle(fontWeight: FontWeight.w400,color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child:
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            if (tempSelected.value != null) {
+                              functionController.onFunctionChanged(
+                                  tempSelected.value);
+                              historyController.fetchHistory(
+                                  historyController.selectedTab.value);
+                            }
+                            Get.back();
+                          },
+                          child: const Text(
+                            "Done",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.4),
+    );
+  }
+
+
 
   Widget _buildTabSelector(bool isTablet) {
     return Container(
