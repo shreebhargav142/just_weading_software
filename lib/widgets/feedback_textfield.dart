@@ -6,9 +6,12 @@ class FeedbackTextfield extends StatelessWidget {
   final TextEditingController controller;
   final bool isNumber;
   final int maxLines;
+  final String? Function(String?)? validator;
+
 
   const FeedbackTextfield({
     super.key,
+    this.validator,
     required this.label,
     required this.hint,
     required this.controller,
@@ -32,7 +35,8 @@ class FeedbackTextfield extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          TextField(
+          TextFormField(
+            validator: validator,
             controller: controller,
             keyboardType: isNumber ? TextInputType.phone : TextInputType.text,
             maxLines: maxLines,

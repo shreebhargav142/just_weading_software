@@ -8,6 +8,9 @@ import '../services/api_service.dart';
 
 class CategoryController extends GetxController {
   var isLoading = true.obs;
+  final dynamic clientId;
+
+  CategoryController({required this.clientId});
 
   var categories = <MenuCategoryDetails>[].obs;
 
@@ -20,7 +23,7 @@ class CategoryController extends GetxController {
   void loadCategories() async {
     try {
       isLoading(true);
-      final response = await ApiService.getMenuCategory(400);
+      final response = await ApiService.getMenuCategory(clientId);
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);

@@ -31,7 +31,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Start Timer
     _timer = Timer(const Duration(seconds: 7), () {
       if (mounted) {
         setState(() {

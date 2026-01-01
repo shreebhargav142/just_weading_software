@@ -10,7 +10,6 @@ class StatusBadge extends StatelessWidget {
     Color bgColor;
     Color textColor;
 
-    // Professional color palette logic
     switch (status) {
       case 'Delivered':
         bgColor = const Color(0xFFE0F7FA); // Light Cyan

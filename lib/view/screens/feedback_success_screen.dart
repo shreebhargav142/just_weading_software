@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/view/home_screen.dart';
-
 import '../../widgets/responsive_layout.dart';
 
 class FeedbackSuccessScreen extends StatelessWidget {
@@ -18,10 +17,7 @@ class FeedbackSuccessScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: ResponsiveDiffLayout(
-          // 1. Mobile View (Normal Sizes)
           MobileBody: _buildContent(context, isTablet: false),
-
-          // 2. Tablet View (Bade Sizes - Scaled Up)
           TabletBody: _buildContent(context, isTablet: true),
         ),
       ),
@@ -43,7 +39,6 @@ class FeedbackSuccessScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 1. Thumbs Up Icon
             Container(
               width: iconSize,
               height: iconSize,
@@ -59,7 +54,6 @@ class FeedbackSuccessScreen extends StatelessWidget {
             ),
             SizedBox(height: isTablet ? 48 : 32),
 
-            // 2. Main Title
             Text(
               "Thank you for your valuable feedback",
               textAlign: TextAlign.center,
@@ -70,8 +64,6 @@ class FeedbackSuccessScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // 3. Subtitle
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
@@ -86,30 +78,59 @@ class FeedbackSuccessScreen extends StatelessWidget {
             ),
             SizedBox(height: isTablet ? 60 : 48),
 
-            // 4. Back Button
-            SizedBox(
-              width: buttonWidth,
-              height: buttonHeight,
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen())),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: _borderColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen())),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: _borderColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      foregroundColor: Colors.black87,
+                    ),
+                    icon: Icon(Icons.arrow_back_ios_new, size: isTablet ? 18 : 14),
+                    label: Text(
+                      "Back",
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w600,
+                        fontSize: isTablet ? 18 : 14,
+                      ),
+                    ),
                   ),
-                  foregroundColor: Colors.black87,
                 ),
-                icon: Icon(Icons.arrow_back_ios_new, size: isTablet ? 18 : 14),
-                label: Text(
-                  "Back",
-                  style: GoogleFonts.nunito(
-                    fontWeight: FontWeight.w600,
-                    fontSize: isTablet ? 18 : 14,
+
+                const SizedBox(width: 16),
+
+                SizedBox(
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _themeColor,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      "View Feedback",
+                      style: GoogleFonts.nunito(
+                        fontWeight: FontWeight.w600,
+                        fontSize: isTablet ? 18 : 14,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            ),          ],
         ),
       ),
     );

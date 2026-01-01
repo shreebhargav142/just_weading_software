@@ -1,11 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/view/auth/login_screen.dart';
+import 'package:just_weding_software/widgets/create_captain_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../controller/auth_controller.dart';
+import '../controller/feedback_controller.dart';
 import '../view/home_screen.dart';
 import '../view/screens/feedback_screen.dart';
 import '../view/screens/order_history_screen.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -15,6 +21,7 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
+  final authController = Get.find<AuthController>();
   String companyName = "";
   String profileImage = "";
   String managerName = "@manager123";
@@ -37,7 +44,6 @@ class _AppDrawerState extends State<AppDrawer> {
       try {
         Map<String, dynamic> userMap = jsonDecode(userData);
         var details = userMap['data']['clientUserDetails'][0];
-
         if (userMap['data'] != null &&
             userMap['data']['clientUserDetails'] != null &&
             (userMap['data']['clientUserDetails'] as List).isNotEmpty) {
@@ -45,8 +51,6 @@ class _AppDrawerState extends State<AppDrawer> {
           String nameFromApi = userMap['data']['clientUserDetails'][0]['companyName'] ?? "";
           String userFromApi = userMap['data']['clientUserDetails'][0]['companyEmail'] ?? "manager";
           String imageFromApi = userMap['data']['clientUserDetails'][0]['imgUrl'] ?? "assets/icon/icon.png";
-
-
 
           print("DEBUG: Extracted Company Name: $nameFromApi");
 
@@ -138,15 +142,6 @@ class _AppDrawerState extends State<AppDrawer> {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.auto_graph, color: Colors.black),
-                    title: Text("Activity",
-                        style: GoogleFonts.nunito(
-                            color: Colors.black,
-                            fontSize: 14.8,
-                            fontWeight: FontWeight.w700)),
-                    onTap: () {},
-                  ),
-                  ListTile(
                     leading:
                     const Icon(Icons.library_books_rounded, color: Colors.black),
                     title: Text("Order History",
@@ -161,16 +156,54 @@ class _AppDrawerState extends State<AppDrawer> {
                               builder: (context) => const OrderHistoryScreen()));
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.star_border, color: Colors.black),
+                  Obx(()=>authController.isCaptain?
+                      const SizedBox.shrink()
+                      : ListTile(
+                      leading:
+                       Icon(PhosphorIconsLight.cowboyHat, color: Colors.black,fontWeight: FontWeight.w600),
+                      title: Text(
+                        'Create Captain',
+                        style: GoogleFonts.nunito(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                            fontSize: 14.8),
+                      ),
+                      onTap: () {
+                         Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateCaptainScreen()));
+                      },
+                    ),
+                  ),
+                  SwitchListTile(
+                    secondary: Icon(
+                      Get.isDarkMode
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
                     title: Text(
-                      'Rate our App',
+                      'Dark Mode',
+                      style: GoogleFonts.nunito(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14.8),
+                    ),
+                    value: Get.isDarkMode,
+                    onChanged: (bool value) {
+                      setState(() {
+                      });
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(PhosphorIconsLight.acorn, color: Colors.black,fontWeight: FontWeight.w600,),
+                    title: Text(
+                      'Function List',
                       style: GoogleFonts.nunito(
                           fontWeight: FontWeight.w700,
                           color: Colors.black,
                           fontSize: 14.8),
                     ),
-                    onTap: () {},
+                    onTap: () {
+
+                    },
                   ),
                   ListTile(
                     leading:
@@ -183,106 +216,15 @@ class _AppDrawerState extends State<AppDrawer> {
                           fontSize: 14.8),
                     ),
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const FeedbackScreen()));
+                      Get.to(
+                            () => const FeedbackScreen(),
+                        binding: BindingsBuilder(() {
+                          Get.put(FeedbackController());
+                        }),
+                      );
                     },
                   ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.settings, color: Colors.black),
-                    title: Text(
-                      'Settings',
-                      style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                          fontSize: 14.8),
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading:
-                    const Icon(Icons.language_outlined, color: Colors.black),
-                    title: Row(
-                      children: [
-                        Text(
-                          'Language',
-                          style: GoogleFonts.nunito(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                              fontSize: 14.8),
-                        ),
-                        const Spacer(),
-                        Text(
-                          'English',
-                          style: GoogleFonts.nunito(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.grey,
-                              fontSize: 12),
-                        )
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.info_outline, color: Colors.black),
-                    title: Text(
-                      'About Us',
-                      style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                          fontSize: 14.8),
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.headphones, color: Colors.black),
-                    title: Text(
-                      'Contact Us',
-                      style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                          fontSize: 14.8),
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading:
-                    const Icon(Icons.library_books_rounded, color: Colors.black),
-                    title: Text(
-                      'Disclaimer',
-                      style: GoogleFonts.nunito(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                          fontSize: 14.8),
-                    ),
-                    onTap: () {},
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.tips_and_updates_outlined,
-                        color: Colors.black),
-                    title: Row(
-                      children: [
-                        Text(
-                          'Version',
-                          style: GoogleFonts.nunito(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                              fontSize: 14.8),
-                        ),
-                        const Spacer(),
-                        Text(
-                          'V 1.2.0',
-                          style: GoogleFonts.nunito(
-                              fontWeight: FontWeight.w700,
-                              color: Colors.grey,
-                              fontSize: 14.8),
-                        ),
-                      ],
-                    ),
-                    onTap: () {},
-                  ),
+
                 ],
               ),
             ),

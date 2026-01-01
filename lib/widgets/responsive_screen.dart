@@ -14,8 +14,7 @@ class ResponsiveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topCenter,
+    return Center( // Center it for the dialog
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth,
