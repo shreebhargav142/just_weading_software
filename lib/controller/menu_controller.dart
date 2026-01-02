@@ -56,53 +56,6 @@ class EventMenuController extends GetxController {
     }
   }
 
-  // void placeOrder() async {
-  //   if (quantities.isEmpty) {
-  //     Get.snackbar("Cart Empty", "Please add items to place an order");
-  //     return;
-  //   }
-  //
-  //   try {
-  //     isPlacingOrder(true);
-  //
-  //     List<Map<String, dynamic>> itemsList = [];
-  //
-  //     for (var item in selectedCartItems) {
-  //       itemsList.add({
-  //         "itemId": item.itemId,
-  //         "itemName": item.itemName,
-  //         "qty": quantities[item.itemId] ?? 0,
-  //         "instruction": "",
-  //         "mealType": "Normal",
-  //         "menuCatId": "",
-  //         "menuCatName": ""
-  //       });
-  //     }
-  //
-  //     Map<String, dynamic> orderBody = {
-  //       "clientUserId": 472,
-  //       "eventId": 471189,
-  //       "functionId": 23265,
-  //       "tableId": 74,
-  //       "itemDetails": itemsList
-  //     };
-  //
-  //     var response = await _apiService.addOrderTable(orderBody);
-  //
-  //     if (response['success'] == true) {
-  //       quantities.clear();
-  //       Get.snackbar("Success", response['msg'] ?? "Order placed successfully!",
-  //           snackPosition: SnackPosition.BOTTOM);
-  //     } else {
-  //       Get.snackbar("Error", response['msg'] ?? "Failed to place order",
-  //           backgroundColor: Colors.red, colorText: Colors.white);
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar("Error", "Something went wrong: $e");
-  //   } finally {
-  //     isPlacingOrder(false);
-  //   }
-  // }
   void placeOrder() async {
     if (quantities.isEmpty) {
       Get.snackbar("Cart Empty", "Please add items to place an order");

@@ -58,6 +58,7 @@ class ClientUserDetails {
   String? category;
   String? emailId;
   String? imgUrl;
+  String? pdfUrl;
 
   ClientUserDetails(
       {this.clientUserId,
@@ -70,7 +71,9 @@ class ClientUserDetails {
         this.userName,
         this.category,
         this.emailId,
-        this.imgUrl});
+        this.imgUrl,
+        this.pdfUrl
+      });
 
   ClientUserDetails.fromJson(Map<String, dynamic> json) {
     clientUserId = json['clientUserId'];
@@ -84,6 +87,7 @@ class ClientUserDetails {
     category = json['category'];
     emailId = json['emailId'];
     imgUrl = json['imgUrl'];
+    pdfUrl=json['pdfUrl'];
   }
 
   Map<String, dynamic> toJson() {
@@ -99,6 +103,7 @@ class ClientUserDetails {
     data['category'] = this.category;
     data['emailId'] = this.emailId;
     data['imgUrl'] = this.imgUrl;
+    data['pdfUrl'] = this.pdfUrl;
     return data;
   }
 }

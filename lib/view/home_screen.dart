@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide MenuController;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/controller/function_controller.dart';
+import 'package:just_weding_software/view/screens/pdf_view.dart';
 import '../controller/auth_controller.dart';
 import '../controller/category_controller.dart';
 import '../controller/menu_controller.dart';
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _drawerKey,
       drawer: const AppDrawer(),
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(context),
       body: Column(
         children: [
           Padding(
@@ -157,13 +158,19 @@ class _HomeScreenState extends State<HomeScreen> {
           }),
 
           Container(height: 1, color: Colors.grey.withOpacity(0.1)),
-
           Expanded(
             child: ResponsiveDiffLayout(
-              MobileBody: _buildItemsGrid(isTablet: false),
-              TabletBody: _buildItemsGrid(isTablet: true),
+              MobileBody: _buildItemsGrid(),
+              TabletBody: _buildItemsList(),
             ),
           ),
+
+          // Expanded(
+          //   child: ResponsiveDiffLayout(
+          //     MobileBody: _buildItemsGrid(isTablet: false),
+          //     TabletBody: _buildItemsGrid(isTablet: true),
+          //   ),
+          // ),
         ],
       ),
       // Cart Summary Bar
@@ -175,115 +182,188 @@ class _HomeScreenState extends State<HomeScreen> {
       }),
     );
   }
-
-  Widget _buildItemsGrid({required bool isTablet}) {
+  Widget _buildItemsGrid() {
     return Obx(() {
-      if (eventMenuController.isLoading.value) {
-        return const Center(child: CircularProgressIndicator(color: Color(0xFFD32F2F)));
-      }
-
-      // Filtered items ka upyog (ItemsDetails list)
       final items = eventMenuController.filteredItems;
 
       if (items.isEmpty) {
-        return const Center(child: Text("No items available in this category"));
+        return const Center(child: Text("No items available"));
       }
 
       return GridView.builder(
         padding: const EdgeInsets.all(16),
-        physics: const BouncingScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: isTablet ? 3 : 2,
-          childAspectRatio: isTablet ? 0.82 : 0.65,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.65,
           crossAxisSpacing: 14,
           mainAxisSpacing: 14,
         ),
         itemCount: items.length,
-        itemBuilder: (context, index) {
-          final foodItem = items[index];
-
+        itemBuilder: (_, index) {
+          final item = items[index];
           return ItemCard(
-            // ItemId dwara unique tracking
-            quantity: eventMenuController.quantities[foodItem.itemId] ?? 0,
-            item: foodItem,
+            quantity: eventMenuController.quantities[item.itemId] ?? 0,
+            item: item,
             onQuantityChanged: (change) {
-              if (foodItem.itemId != null) {
-                eventMenuController.updateQuantity(foodItem.itemId!, change);
-              }
+              eventMenuController.updateQuantity(item.itemId!, change);
             },
-            onEditToggle: () {
-              // Info ya instructions ke liye logic
-            },
+            onEditToggle: () {},
           );
         },
       );
     });
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  // Widget _buildItemsGrid({required bool isTablet}) {
+  //   return Obx(() {
+  //     if (eventMenuController.isLoading.value) {
+  //       return const Center(child: CircularProgressIndicator(color: Color(0xFFD32F2F)));
+  //     }
+  //
+  //     // Filtered items ka upyog (ItemsDetails list)
+  //     final items = eventMenuController.filteredItems;
+  //
+  //     if (items.isEmpty) {
+  //       return const Center(child: Text("No items available in this category"));
+  //     }
+  //
+  //     return GridView.builder(
+  //       padding: const EdgeInsets.all(16),
+  //       physics: const BouncingScrollPhysics(),
+  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         crossAxisCount: isTablet ? 3 : 2,
+  //         childAspectRatio: isTablet ? 0.82 : 0.65,
+  //         crossAxisSpacing: 14,
+  //         mainAxisSpacing: 14,
+  //       ),
+  //       itemCount: items.length,
+  //       itemBuilder: (context, index) {
+  //         final foodItem = items[index];
+  //
+  //         return ItemCard(
+  //           // ItemId dwara unique tracking
+  //           quantity: eventMenuController.quantities[foodItem.itemId] ?? 0,
+  //           item: foodItem,
+  //           onQuantityChanged: (change) {
+  //             if (foodItem.itemId != null) {
+  //               eventMenuController.updateQuantity(foodItem.itemId!, change);
+  //             }
+  //           },
+  //           onEditToggle: () {
+  //             // Info ya instructions ke liye logic
+  //           },
+  //         );
+  //       },
+  //     );
+  //   });
+  // }
+  Widget _buildItemsList() {
+    return Obx(() {
+      final items = eventMenuController.filteredItems;
+
+      if (items.isEmpty) {
+        return const Center(child: Text("No items available"));
+      }
+
+      return ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, index) {
+          final item = items[index];
+          return SizedBox(
+            height: 140, // Tablet row height
+            child: ItemCard(
+              quantity: eventMenuController.quantities[item.itemId] ?? 0,
+              item: item,
+              onQuantityChanged: (change) {
+                eventMenuController.updateQuantity(item.itemId!, change);
+              },
+              onEditToggle: () {},
+            ),
+          );
+        },
+      );
+    });
+  }
+
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final double width = MediaQuery.of(context).size.width;
+    final bool isTablet = width >= 600;
+
+    final double appBarHeight = isTablet ? 450 : 250;
+
     return PreferredSize(
-      preferredSize: const Size.fromHeight(250), // Image ki height ke liye
+      preferredSize: Size.fromHeight(appBarHeight),
       child: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-            onPressed: () => _drawerKey.currentState!.openDrawer(),
-            icon: const Icon(Icons.menu, color: Colors.black)),
-
+          onPressed: () => _drawerKey.currentState!.openDrawer(),
+          icon: Icon(Icons.menu, color: Colors.black, size: isTablet ? 32 : 24),
+        ),
+        centerTitle: false,
         titleSpacing: 0,
         title: Text(
           "Quick Order",
           style: GoogleFonts.nunito(
-              fontWeight: FontWeight.w500, color: Colors.black, fontSize: 18),
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+            fontSize: isTablet ? 26 : 20,
+          ),
         ),
-
-
         flexibleSpace: Stack(
           children: [
-            const SizedBox(height: 15,),
-            // Background Image (Full Width/Height)
             Positioned.fill(
               child: Image.asset(
                 'assets/images/appbar_img.png',
-                fit: BoxFit.cover,
+                fit: BoxFit.cover, // Ensure it fills the height
               ),
             ),
-            // Logo aur Tagline (Center mein)
-            SafeArea(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-                    Text(
-                      "A Symphony of Flavors!",
-                      style: GoogleFonts.nunito(fontSize: 12, color: Colors.grey[700]),
-                    ),
-                    const SizedBox(height: 10),
 
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 10),
+            // 2. Overlay for readability
+            Positioned.fill(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(1),
-                ),
-                child: Text(
-                  "Today's Exclusive Menu",
-                  style: GoogleFonts.nunito(
-                      fontSize: 12,
+                color: Colors.white.withOpacity(0.2), // Light tint
+              ),
+            ),
+
+            // 3. Content - Using Padding instead of just Center],
+        ]),
+        actions: [
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: EdgeInsets.only(right: 15),
+              child: InkWell(
+                onTap: () {
+                  final authController = Get.find<AuthController>();
+                  final pdfUrl = authController.user.value?.pdfUrl;
+
+                  if (pdfUrl != null && pdfUrl.isNotEmpty) {
+                    Get.to(() => PdfViewerScreen(
+                      pdfUrl: pdfUrl,
+                      title: "Exclusive Menu",
+                    ));
+                  } else {
+                    Get.snackbar("Not Available", "Menu PDF not found");
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: Colors.green, width: 1)
+                  ),
+                  child: Text(
+                    "Today's Exclusive Menu",
+                    style: GoogleFonts.nunito(
+                      fontSize: isTablet ? 14 : 10,
                       color: Colors.green,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -293,7 +373,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
   void _openFunctionSelectorDialog() {
     final tempSelected =
     Rx<FunctionManagerAssignDetails?>(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart' hide ResponsiveScreen;
+import 'package:just_weding_software/view/home_screen.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/function_controller.dart';
 import '../../controller/order_history_controller.dart';
@@ -26,19 +27,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   void initState() {
     super.initState();
-
     functionController = Get.find<FunctionController>();
-
     final clientId = authController.user.value?.clientUserId ?? 504;
-    final eventId =
-        functionController.selectedFunction.value?.eventId ?? 471194;
-    final functionId =
-        functionController.selectedFunction.value?.functionId ?? 23266;
+    final eventId = functionController.selectedFunction.value?.eventId ?? 471194;
+    final functionId = functionController.selectedFunction.value?.functionId ?? 23266;
 
     if (Get.isRegistered<OrderHistoryController>()) {
       Get.delete<OrderHistoryController>();
     }
-
     historyController = Get.put(
       OrderHistoryController(
         clientId: clientId,
@@ -61,7 +57,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
-          onPressed: Get.back,
+          onPressed: () => Get.offAll(() => HomeScreen()),
           icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.black),
         ),
         title: Text(
@@ -125,14 +121,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         ],
       ),
     );
-
   }
   void _openFunctionSelectorDialog() {
     final tempSelected =
     Rx<FunctionManagerAssignDetails?>(
       functionController.selectedFunction.value,
     );
-
     Get.dialog(
       Center(
         child: ResponsiveScreen(
@@ -161,7 +155,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   ),
                   const SizedBox(height: 12),
                   const Divider(),
-
                   Flexible(
                     child: Obx(() => ListView.builder(
                       shrinkWrap: true,
@@ -229,11 +222,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       },
                     )),
                   ),
-
                   const Divider(),
                   const SizedBox(height: 8),
-
-                  // ---------- BUTTONS ----------
                   Row(
                     children: [
                       Expanded(
@@ -297,8 +287,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-
-
   Widget _buildTabSelector(bool isTablet) {
     return Container(
       height: isTablet ? 70 : 60,
@@ -348,7 +336,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
-
 
   Widget _buildOrderList(bool isCaptain, bool isTablet) {
     return Obx(() {
@@ -432,8 +419,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       OrderTableDetail item, bool isCaptain, bool isTablet) {
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isTablet ? 32 : 20,
-        vertical: 5,
+        horizontal: isTablet ? 20 : 2,
+        vertical: isTablet ? 18 : 15,
       ),
       padding: EdgeInsets.all(isTablet ? 20 : 16),
       decoration: BoxDecoration(
@@ -481,7 +468,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
-
 
   Widget _buildStatusBadge(String status, bool isCaptain) {
     Color color = switch (status) {
