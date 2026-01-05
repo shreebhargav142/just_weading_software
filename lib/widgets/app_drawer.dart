@@ -28,6 +28,9 @@ class _AppDrawerState extends State<AppDrawer> {
   String profileImage = "";
   String managerName = "@manager123";
 
+  late final bool isTablet = MediaQuery.of(context).size.width >= 600;
+
+
   @override
   void initState() {
     super.initState();
@@ -244,16 +247,68 @@ class _AppDrawerState extends State<AppDrawer> {
                     color: Colors.red,
                     fontSize: 14.8),
               ),
-              onTap: () async {
-                print("DEBUG: Logging out...");
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.clear(); // Data Clear
-                print("DEBUG: Data Cleared.");
-
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                        (route) => false
+              onTap: () {
+                Get.dialog(
+                  Dialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    child: Container(
+                      width: isTablet? 220 : double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.logout_rounded, color: Colors.red, size: 50),
+                          const SizedBox(height: 20),
+                          Text(
+                            "Logout",
+                            style: GoogleFonts.nunito(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            "Are you sure you want to log out?",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.nunito(fontSize: 16),
+                          ),
+                          const SizedBox(height: 25),
+                          Row(
+                            children: [
+                              // Cancel Button
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Get.back(),
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(color: Colors.grey),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  child: Text("No", style: GoogleFonts.nunito(color: Colors.black)),
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              // Confirm Button
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () => authController.logout(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  child: Text("Yes", style: GoogleFonts.nunito(color: Colors.white)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
             ),

@@ -1,10 +1,14 @@
+
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../model/authModel.dart';
 import '../services/api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../view/home_screen.dart';
+import '../view/auth/login_screen.dart'; // Ensure correct path
+
 class AuthController extends GetxController {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -16,12 +20,25 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadUserRole();
+    _checkExistingLogin(); // App start hote hi check karega
   }
 
-  void _loadUserRole() async {
+  // Check if user is already logged in (Auto-Login Logic)
+  void _checkExistingLogin() async {
     final prefs = await SharedPreferences.getInstance();
-    userRole.value = (prefs.getString('userRole') ?? '').toLowerCase();
+    bool? isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      String? userData = prefs.getString('userData');
+      if (userData != null) {
+        final jsonResponse = json.decode(userData);
+        final authData = AuthModel.fromJson(jsonResponse);
+        if (authData.data != null && authData.data!.clientUserDetails!.isNotEmpty) {
+          user.value = authData.data!.clientUserDetails![0];
+          userRole.value = (user.value?.category ?? '').toLowerCase();
+        }
+      }
+    }
   }
 
   bool get isCaptain =>
@@ -30,7 +47,7 @@ class AuthController extends GetxController {
   bool get isManager =>
       (user.value?.category ?? userRole.value).toLowerCase() == 'manager';
 
-
+  // --- LOGIN FUNCTION ---
   Future<bool> login() async {
     try {
       isLoading.value = true;
@@ -53,7 +70,9 @@ class AuthController extends GetxController {
           final role = (details.category ?? 'user').toLowerCase();
           userRole.value = role;
 
+          // Save to SharedPreferences for Auto-Login
           final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true); // Yeh flag important hai
           await prefs.setString('userRole', role);
           await prefs.setString('userData', jsonEncode(jsonResponse));
 
@@ -61,9 +80,7 @@ class AuthController extends GetxController {
           return true;
         }
       }
-
       return false;
-
     } catch (e) {
       debugPrint("Login Error: $e");
       return false;
@@ -71,4 +88,29 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-}
+
+  // --- LOGOUT FUNCTION ---
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 1. SharedPreferences se data clear karein
+      await prefs.remove('isLoggedIn');
+      await prefs.remove('userData');
+      await prefs.remove('userRole');
+
+      // 2. Controllers ko CLEAR karein (Isse fields blank ho jayengi)
+      usernameController.clear();
+      passwordController.clear();
+
+      // 3. Rx variables ko reset karein
+      user.value = null;
+      userRole.value = '';
+
+      // 4. Navigate to Login
+      Get.offAll(() => const LoginScreen());
+
+    } catch (e) {
+      debugPrint("Logout Error: $e");
+    }
+  }}

@@ -13,7 +13,8 @@ class ApiService {
 
   //1 Post LogIn
   static Future<http.Response> getLoginCustomer(String username,
-      String password,) async {
+      String password,)
+  async {
     var url = Uri.parse("$baseUrl/loginclientuser/");
     var body = {"userName": username, "password": password};
     return await http.post(

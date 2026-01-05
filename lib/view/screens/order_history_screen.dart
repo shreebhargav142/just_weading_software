@@ -444,8 +444,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           _buildStatusBadge(item.status ?? "New", isCaptain, item.orderTableId),
         ],
       ),
-    );
-  }
+    );}
 
   Widget _detail(String label, String? value) {
     return Padding(
@@ -496,7 +495,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-// Status update karne ke liye BottomSheet ya Dialog
   void _showStatusActionSheet(int? orderId, String currentStatus) {
     if (orderId == null) return;
 
@@ -513,11 +511,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
             Text("Update Status", style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 15),
 
-            // Agar status "New" hai, toh "In Progress" dikhao
             if (currentStatus == "Create" || currentStatus == "New")
               _statusTile("InProgress", "Move to In Progress", Colors.orange, orderId),
-
-            // Agar status "InProgress" hai, toh "Delivered" dikhao
             if (currentStatus == "InProgress")
               _statusTile("Delivered", "Mark as Delivered", Colors.green, orderId),
 
@@ -533,17 +528,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       leading: Icon(Icons.sync, color: color),
       title: Text(label, style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
       onTap: () {
-        Get.back(); // Dialog band karein
-        historyController.updateStatus(orderId, apiValue); // API call karein
-      },
-    );
-  }
-  Widget _statusOption(String apiValue, String label, Color color, int orderId) {
-    return ListTile(
-      leading: Icon(Icons.circle, color: color),
-      title: Text(label, style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
-      onTap: () {
-        Get.back(); // Close bottomsheet
+        Get.back();
         historyController.updateStatus(orderId, apiValue);
       },
     );
