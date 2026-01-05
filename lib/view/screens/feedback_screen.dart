@@ -78,21 +78,18 @@ class FeedbackScreen extends GetView<FeedbackController> {
                       controller: controller.instagramController,
                     ),
                     SizedBox(height: fieldGap),
-
                     _buildDateField(
                       context,
                       "What's your DOB",
                       controller.dobController,
                     ),
                     SizedBox(height: fieldGap),
-
                     _buildDateField(
                       context,
                       "What's your Anniversary",
                       controller.anniversaryController,
                     ),
                     SizedBox(height: fieldGap),
-
                     FeedbackTextfield(
                       label: "Any feedback, comments, or concerns?",
                       hint: "Describe your experience here...",
@@ -115,8 +112,6 @@ class FeedbackScreen extends GetView<FeedbackController> {
       ),
     );
   }
-
-  // ---------------- UI PARTS ----------------
 
   AppBar _buildAppBar() {
     return AppBar(
@@ -228,7 +223,6 @@ class FeedbackScreen extends GetView<FeedbackController> {
       ],
     );
   }
-
   Widget _buildSubmitButton(bool isTablet) {
     return Obx(
           () => SizedBox(

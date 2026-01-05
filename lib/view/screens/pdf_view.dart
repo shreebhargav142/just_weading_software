@@ -21,7 +21,9 @@ class PdfViewerScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back_ios,color: Colors.black,)),
+        leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, icon: Icon(Icons.arrow_back_ios,color: Colors.black,)),
         title: Text(title,style: GoogleFonts.nunito(fontSize: 19,color: Colors.black,fontWeight: FontWeight.w700),),
         actions: [
           IconButton(

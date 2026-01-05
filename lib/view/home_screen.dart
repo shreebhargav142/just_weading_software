@@ -23,7 +23,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Controller initialize
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey<ScaffoldState>();
 
   late final FunctionController functionController;
@@ -164,16 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
               TabletBody: _buildItemsList(),
             ),
           ),
-
-          // Expanded(
-          //   child: ResponsiveDiffLayout(
-          //     MobileBody: _buildItemsGrid(isTablet: false),
-          //     TabletBody: _buildItemsGrid(isTablet: true),
-          //   ),
-          // ),
         ],
       ),
-      // Cart Summary Bar
       bottomNavigationBar: Obx(() {
         int totalItems = eventMenuController.quantities.values.fold(0, (sum, qty) => sum + qty);
         return totalItems > 0
@@ -214,49 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Widget _buildItemsGrid({required bool isTablet}) {
-  //   return Obx(() {
-  //     if (eventMenuController.isLoading.value) {
-  //       return const Center(child: CircularProgressIndicator(color: Color(0xFFD32F2F)));
-  //     }
-  //
-  //     // Filtered items ka upyog (ItemsDetails list)
-  //     final items = eventMenuController.filteredItems;
-  //
-  //     if (items.isEmpty) {
-  //       return const Center(child: Text("No items available in this category"));
-  //     }
-  //
-  //     return GridView.builder(
-  //       padding: const EdgeInsets.all(16),
-  //       physics: const BouncingScrollPhysics(),
-  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //         crossAxisCount: isTablet ? 3 : 2,
-  //         childAspectRatio: isTablet ? 0.82 : 0.65,
-  //         crossAxisSpacing: 14,
-  //         mainAxisSpacing: 14,
-  //       ),
-  //       itemCount: items.length,
-  //       itemBuilder: (context, index) {
-  //         final foodItem = items[index];
-  //
-  //         return ItemCard(
-  //           // ItemId dwara unique tracking
-  //           quantity: eventMenuController.quantities[foodItem.itemId] ?? 0,
-  //           item: foodItem,
-  //           onQuantityChanged: (change) {
-  //             if (foodItem.itemId != null) {
-  //               eventMenuController.updateQuantity(foodItem.itemId!, change);
-  //             }
-  //           },
-  //           onEditToggle: () {
-  //             // Info ya instructions ke liye logic
-  //           },
-  //         );
-  //       },
-  //     );
-  //   });
-  // }
   Widget _buildItemsList() {
     return Obx(() {
       final items = eventMenuController.filteredItems;

@@ -216,11 +216,8 @@ class ApiService {
 
   Future<OrderHistoryModel?> getOrderHistoryByStatus(int clientUserId,
       int eventId, int functionId, String status) async {
-    String apiStatus = status == "New" ? "Create" : status == "In Progress"
-        ? "Inprogress"
-        : status;
     var url = Uri.parse(
-        "$baseUrl/getordertablebystatusandeventandfunctionid/$clientUserId/$eventId/$functionId/$apiStatus/");
+        "$baseUrl/getordertablebystatusandeventandfunctionid/$clientUserId/$eventId/$functionId/$status/");
     print("Final API URL: $url");
     try {
       final response = await http.get(url);

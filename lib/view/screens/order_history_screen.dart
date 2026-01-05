@@ -5,7 +5,7 @@ import 'package:just_weding_software/view/home_screen.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/function_controller.dart';
 import '../../controller/order_history_controller.dart';
-import '../../model/function_model.dart';
+import '../../model/function_model.dart' hide Data;
 import '../../model/order_history_model.dart';
 import '../../utils/date_utils.dart';
 import '../../widgets/responsive_screen.dart';
@@ -336,7 +336,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       ),
     );
   }
-
   Widget _buildOrderList(bool isCaptain, bool isTablet) {
     return Obx(() {
       if (historyController.isLoading.value) {
@@ -360,9 +359,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       );
     });
   }
-
   Widget _buildTableCard(
-      TableData table, int index, bool isCaptain, bool isTablet) {
+      Data table, int index, bool isCaptain, bool isTablet) {
     return Obx(() {
       final expanded = historyController.expandedTableIndex.value == index;
 
@@ -416,7 +414,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Widget _buildOrderItem(
-      OrderTableDetail item, bool isCaptain, bool isTablet) {
+      OrderTableDetails item, bool isCaptain, bool isTablet) {
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: isTablet ? 20 : 2,
@@ -436,13 +434,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               children: [
                 _detail("Category", item.menuCatName),
                 _detail("Item", item.itemName),
+                _detail("Quantity", "${item.qty ?? 0}"),
                 _detail("Instruction", item.instruction),
                 _detail("Meal Type", item.mealType),
-                _detail("Quantity", "${item.qty ?? 0}"),
+                _detail("Order Time", "${item.time} min ago"),
               ],
             ),
           ),
-          _buildStatusBadge(item.status ?? "New", isCaptain),
+          _buildStatusBadge(item.status ?? "New", isCaptain, item.orderTableId),
         ],
       ),
     );
@@ -469,7 +468,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
   }
 
-  Widget _buildStatusBadge(String status, bool isCaptain) {
+  Widget _buildStatusBadge(String status, bool isCaptain, int? orderTableId) {
     Color color = switch (status) {
       "Create" || "New" => Colors.red,
       "InProgress" => Colors.orange,
@@ -477,22 +476,76 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       _ => Colors.grey,
     };
 
-    final badge = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        status == "Create" ? "New" : status,
-        style: GoogleFonts.nunito(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
+    return InkWell(
+      onTap: isCaptain ? () => _showStatusActionSheet(orderTableId, status) : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color),
+        ),
+        child: Text(
+          status == "Create" ? "New" : status,
+          style: GoogleFonts.nunito(
+            color: color,
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+          ),
         ),
       ),
     );
+  }
 
-    return isCaptain ? InkWell(child: badge) : badge;
+// Status update karne ke liye BottomSheet ya Dialog
+  void _showStatusActionSheet(int? orderId, String currentStatus) {
+    if (orderId == null) return;
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Update Status", style: GoogleFonts.nunito(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 15),
+
+            // Agar status "New" hai, toh "In Progress" dikhao
+            if (currentStatus == "Create" || currentStatus == "New")
+              _statusTile("InProgress", "Move to In Progress", Colors.orange, orderId),
+
+            // Agar status "InProgress" hai, toh "Delivered" dikhao
+            if (currentStatus == "InProgress")
+              _statusTile("Delivered", "Mark as Delivered", Colors.green, orderId),
+
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusTile(String apiValue, String label, Color color, int orderId) {
+    return ListTile(
+      leading: Icon(Icons.sync, color: color),
+      title: Text(label, style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
+      onTap: () {
+        Get.back(); // Dialog band karein
+        historyController.updateStatus(orderId, apiValue); // API call karein
+      },
+    );
+  }
+  Widget _statusOption(String apiValue, String label, Color color, int orderId) {
+    return ListTile(
+      leading: Icon(Icons.circle, color: color),
+      title: Text(label, style: GoogleFonts.nunito(fontWeight: FontWeight.w600)),
+      onTap: () {
+        Get.back(); // Close bottomsheet
+        historyController.updateStatus(orderId, apiValue);
+      },
+    );
   }
 }

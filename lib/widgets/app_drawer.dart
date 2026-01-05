@@ -8,8 +8,10 @@ import 'package:just_weding_software/widgets/create_captain_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controller/auth_controller.dart';
 import '../controller/feedback_controller.dart';
+import '../controller/function_controller.dart';
 import '../view/home_screen.dart';
 import '../view/screens/feedback_screen.dart';
+import '../view/screens/function_list_screen.dart';
 import '../view/screens/order_history_screen.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -72,6 +74,8 @@ class _AppDrawerState extends State<AppDrawer> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Drawer(
       child: Container(
         color: Colors.white,
@@ -85,7 +89,8 @@ class _AppDrawerState extends State<AppDrawer> {
                     decoration: const BoxDecoration(),
                     child: Row(
                       children: [
-                        Container(height: 80,width: 80,
+                        Container(
+                          height:80,width: 80,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey[200],
@@ -112,7 +117,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.nunito(
                                       color: Colors.black,
-                                      fontSize: 18,
+                                      fontSize:18,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -120,7 +125,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 managerName,
                                 style: GoogleFonts.nunito(
                                     color: Colors.black45,
-                                    fontSize: 14,
+                                    fontSize:14,
                                     fontWeight: FontWeight.w400),
                               )
                             ],
@@ -130,7 +135,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.home, color: Colors.black),
+                    leading: const Icon(Icons.home_outlined, color: Colors.black),
                     title: Text("Home",
                         style: GoogleFonts.nunito(
                             color: const Color(0xFF121212),
@@ -201,10 +206,13 @@ class _AppDrawerState extends State<AppDrawer> {
                           color: Colors.black,
                           fontSize: 14.8),
                     ),
-                    onTap: () {
-
-                    },
-                  ),
+                      onTap: () {
+                        final authController = Get.find<AuthController>();
+                        final id = authController.user.value?.clientUserId ?? 504;
+                        Get.to(() => const FunctionListScreen(), binding: BindingsBuilder(() {
+                          Get.put(FunctionController(clientUserId: id));
+                        }));
+                      }                  ),
                   ListTile(
                     leading:
                     const Icon(Icons.message_outlined, color: Colors.black),
