@@ -5,10 +5,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:just_weding_software/view/initial_screen/splash.dart';
 
 void main() {
-  runApp(DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context)=>const MyApp(),
-      ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -21,7 +18,7 @@ class MyApp extends StatelessWidget {
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Just Wedding Software',
       theme: ThemeData(
         useMaterial3: false,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

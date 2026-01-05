@@ -5,17 +5,12 @@ import '../model/authModel.dart';
 import '../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../view/home_screen.dart';
-
 class AuthController extends GetxController {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
   var isLoading = false.obs;
-
-  /// Logged-in user
   var user = Rxn<ClientUserDetails>();
-
-  /// Stored role (for app restart)
   var userRole = ''.obs;
 
   @override
@@ -29,17 +24,14 @@ class AuthController extends GetxController {
     userRole.value = (prefs.getString('userRole') ?? '').toLowerCase();
   }
 
-  /// ✅ SINGLE SOURCE OF TRUTH
   bool get isCaptain =>
       (user.value?.category ?? userRole.value).toLowerCase() == 'captain';
 
   bool get isManager =>
       (user.value?.category ?? userRole.value).toLowerCase() == 'manager';
 
-  // ----------------------------------------------------
-  // LOGIN (only role part updated)
-  // ----------------------------------------------------
-  void login() async {
+
+  Future<bool> login() async {
     try {
       isLoading.value = true;
 
@@ -48,25 +40,33 @@ class AuthController extends GetxController {
         passwordController.text.trim(),
       );
 
+      if (response.body.isEmpty) return false;
+
       final jsonResponse = json.decode(response.body);
       final authData = AuthModel.fromJson(jsonResponse);
 
       if (response.statusCode == 200 && authData.success == true) {
-        final details = authData.data!.clientUserDetails![0];
+        if (authData.data != null && authData.data!.clientUserDetails!.isNotEmpty) {
+          final details = authData.data!.clientUserDetails![0];
 
-        /// Set user
-        user.value = details;
+          user.value = details;
+          final role = (details.category ?? 'user').toLowerCase();
+          userRole.value = role;
 
-        /// Normalize & store role
-        final role = (details.category ?? 'user').toLowerCase();
-        userRole.value = role;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userRole', role);
+          await prefs.setString('userData', jsonEncode(jsonResponse));
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userRole', role);
-        await prefs.setString('userData', jsonEncode(jsonResponse));
-
-        Get.offAll(() => HomeScreen());
+          Get.offAll(() => const HomeScreen());
+          return true;
+        }
       }
+
+      return false;
+
+    } catch (e) {
+      debugPrint("Login Error: $e");
+      return false;
     } finally {
       isLoading.value = false;
     }

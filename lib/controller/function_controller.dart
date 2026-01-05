@@ -1,38 +1,3 @@
-// import 'package:get/get.dart';
-// import 'package:just_weding_software/model/function_model.dart';
-//
-// import '../services/api_service.dart';
-//
-// class FunctionController extends GetxController {
-//   late final dynamic clientUserId;
-//   var isLoading = true.obs;
-//   var functionList = <FunctionManagerAssignDetails>[].obs;
-//   var imageUrl = "".obs;
-//
-//   @override
-//   void onInit() {
-//     getFunctions();
-//     super.onInit();
-//   }
-//
-//   void getFunctions() async {
-//     try {
-//       isLoading(true);
-//       var response = await ApiService().fetchFunction(clientUserId);
-//       if (response != null && response.data != null) {
-//         functionList.assignAll(response.data!.details!);
-//
-//         // Set the image URL from the first item for the AppBar
-//         if (functionList.isNotEmpty) {
-//           imageUrl.value = functionList[0].imgUrl ?? "";
-//         }
-//       }
-//     } finally {
-//       isLoading(false);
-//     }
-//   }
-// }
-
 import 'package:get/get.dart';
 import 'package:just_weding_software/model/function_model.dart';
 import '../services/api_service.dart';

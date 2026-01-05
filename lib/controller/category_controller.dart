@@ -5,7 +5,6 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import '../model/category_model.dart';
 import '../services/api_service.dart';
 
-
 class CategoryController extends GetxController {
   var isLoading = true.obs;
   final dynamic clientId;

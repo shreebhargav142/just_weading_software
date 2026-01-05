@@ -11,9 +11,7 @@ class FeedbackController extends GetxController {
   var isLoading = false.obs;
   var selectedRating = 5.obs;
 
-  // Standard Form Key for bottom-line validation
   final formKey = GlobalKey<FormState>();
-
   final nameController = TextEditingController();
   final mobileController = TextEditingController();
   final cityController = TextEditingController();
@@ -22,7 +20,6 @@ class FeedbackController extends GetxController {
   final anniversaryController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  // 1. Date Picker Logic: Format automatically to YYYY-MM-DD for API
   Future<void> selectDate(BuildContext context, TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
@@ -31,12 +28,10 @@ class FeedbackController extends GetxController {
       lastDate: DateTime(2101),
     );
     if (picked != null) {
-      // API formatted date
       controller.text = DateFormat('yyyy-MM-dd').format(picked);
     }
   }
 
-  // 2. Submit Logic
   Future<void> submitFeedback() async {
     if (!formKey.currentState!.validate()) {
       return;
@@ -44,7 +39,6 @@ class FeedbackController extends GetxController {
 
     try {
       isLoading(true);
-
       Map<String, dynamic> body = {
         "rating": selectedRating.value,
         "personName": nameController.text.trim(),
@@ -69,7 +63,6 @@ class FeedbackController extends GetxController {
 
         _clearForm();
 
-        // Success ke baad thoda wait karke back jayein
         Future.delayed(const Duration(milliseconds: 1500), () {
           Get.off(() => const FeedbackSuccessScreen());
         });
@@ -114,7 +107,6 @@ class FeedbackController extends GetxController {
     super.onClose();
   }
 
-  // Common UI Popup
   void _showBottomPopup({
     required String message,
     required Color backgroundColor,

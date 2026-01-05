@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'dart:async';
 
 import '../auth/login_screen.dart';
@@ -15,12 +14,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Timer? _timer;
   bool _autoSlideUp = false;
-  bool _showSplash = true; // 1. Add this variable to control visibility
+  bool _showSplash = true;
 
   @override
   void initState() {
     super.initState();
-    FlutterNativeSplash.remove();
 
     _controller = AnimationController(
       vsync: this,

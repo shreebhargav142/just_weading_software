@@ -156,18 +156,12 @@ class _ItemCardState extends State<ItemCard> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 );
               },
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.broken_image,
-                color: Colors.grey,
-                size: 30,
-              ),
+              errorBuilder: (_, __, ___) =>  Image.asset('assets/images/silverveg.jpg',)
             )
-                : const Icon(Icons.fastfood,
-                color: Colors.grey, size: 40),
+                :  Image.asset('assets/images/silverveg.jpg',)
           ),
         ),
 
-        // INFO ICON
         if (widget.quantity > 0 || isTablet)
           Positioned(
             top: 8,

@@ -18,100 +18,6 @@ class CategoryList extends StatefulWidget {
   State<CategoryList> createState() => _CategoryListState();
 }
 
-// class _CategoryListState extends State<CategoryList> {
-//   late final CategoryController controller = Get.put(CategoryController(clientId: widget.clientId));
-//   int selectedIndex = 0;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Obx(() {
-//       if (controller.isLoading.value) {
-//         return const Center(
-//           child: CircularProgressIndicator(color: Colors.red),
-//         );
-//       }
-//
-//       if (controller.categories.isEmpty) {
-//         return const Center(child: Text("No categories found"));
-//       }
-//
-//       return SizedBox(
-//         height: 120,
-//         child: ListView.separated(
-//           scrollDirection: Axis.horizontal,
-//           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-//           itemCount: controller.categories.length,
-//           separatorBuilder: (_, __) => const SizedBox(width: 20),
-//           itemBuilder: (context, index) => _buildCategoryItem(index),
-//         ),
-//       );
-//     });
-//   }
-//
-//   Widget _buildCategoryItem(int index) {
-//     final category = controller.categories[index];
-//     final bool isSelected = index == selectedIndex;
-//
-//     return GestureDetector(
-//       onTap: () {
-//         setState(() => selectedIndex = index);
-//         widget.onCategorySelected(category);
-//       },
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         children: [
-//           Container(
-//             height: 60,
-//             width: 60,
-//             decoration: BoxDecoration(
-//               shape: BoxShape.circle,
-//               border: Border.all(
-//                 color: isSelected ? Colors.red : Colors.grey.shade300,
-//                 width: 2,
-//               ),
-//             ),
-//             child: Padding(
-//               padding: const EdgeInsets.all(3.0),
-//               child: CircleAvatar(
-//                 backgroundColor: Colors.white,
-//                 backgroundImage: (category.menuImage != null && category.menuImage!.isNotEmpty)
-//                     ? NetworkImage(category.menuImage!)
-//                     : null,
-//                 child: (category.menuImage == null || category.menuImage!.isEmpty)
-//                     ? Icon(Icons.fastfood, color: Colors.grey[400], size: 24)
-//                     : null,
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 8),
-//           Expanded(
-//             flex: 1,
-//             child: Text(
-//               category.menuname ?? '',
-//               overflow: TextOverflow.ellipsis,
-//               textAlign: TextAlign.center,
-//               style: GoogleFonts.nunito(
-//                 fontSize: 12,
-//                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-//                 color: isSelected ? Colors.black : Colors.grey[600],
-//               ),
-//             ),
-//           ),
-//           if (isSelected)
-//             Container(
-//               margin: const EdgeInsets.only(top: 4),
-//               height: 5,
-//               width: 5,
-//               decoration: const BoxDecoration(
-//                 color: Colors.red,
-//                 shape: BoxShape.circle,
-//               ),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 class _CategoryListState extends State<CategoryList> {
   late final CategoryController controller = Get.put(CategoryController(clientId: widget.clientId));
   int selectedIndex = 0;
@@ -152,6 +58,8 @@ class _CategoryListState extends State<CategoryList> {
     final double avatarSize = isTablet ? 120 : 60;
     final double fontSize = isTablet ? 16 : 12;
 
+    final String? imageUrl = category.menuImage;
+
     return GestureDetector(
       onTap: () {
         setState(() => selectedIndex = index);
@@ -165,23 +73,40 @@ class _CategoryListState extends State<CategoryList> {
             width: avatarSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: Colors.white,
               border: Border.all(
                 color: isSelected ? Colors.red : Colors.grey.shade300,
-                width: isTablet ? 3 : 2, // Thicker border for tablet
+                width: isTablet ? 3 : 2,
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                backgroundImage: (category.menuImage != null && category.menuImage!.isNotEmpty)
-                    ? NetworkImage(category.menuImage!)
-                    : null,
-                child: (category.menuImage == null || category.menuImage!.isEmpty)
-                    ? Icon(Icons.fastfood,
-                    color: Colors.grey[400],
-                    size: isTablet ? 40 : 24) // Larger icon
-                    : null,
+            child: ClipOval(
+              child: (imageUrl == null || imageUrl.isEmpty)
+                  ? Image.asset(
+                'assets/icon/icon.png',
+                fit: BoxFit.cover,
+              )
+                  : Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/icon/icon.png',
+                    fit: BoxFit.cover,
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                          : null,
+                      strokeWidth: 2,
+                      color: Colors.red.withOpacity(0.5),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -199,7 +124,7 @@ class _CategoryListState extends State<CategoryList> {
           if (isSelected)
             Container(
               margin: const EdgeInsets.only(top: 4),
-              height: isTablet ? 8 : 5, // Larger dot indicator
+              height: isTablet ? 8 : 5,
               width: isTablet ? 8 : 5,
               decoration: const BoxDecoration(
                 color: Colors.red,

@@ -109,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 60,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
+                                color: Colors.white, // Taki loader ke piche white background rahe
                                 border: Border.all(
                                   color: isSelected ? Colors.red : Colors.grey.shade300,
                                   width: 2,
@@ -116,14 +117,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(3.0),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  backgroundImage: (category.menuImage != null && category.menuImage!.isNotEmpty)
-                                      ? NetworkImage(category.menuImage!)
-                                      : null,
-                                  child: (category.menuImage == null || category.menuImage!.isEmpty)
-                                      ? Icon(Icons.fastfood, color: Colors.grey[400], size: 24)
-                                      : null,
+                                child: ClipOval(
+                                  child: (category.menuImage != null && category.menuImage!.isNotEmpty)
+                                      ? Image.network(
+                                    category.menuImage!,
+                                    fit: BoxFit.cover, // Image ko circle mein set karne ke liye
+                                    // Jab image load ho rahi ho
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return const Center(
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+                                      );
+                                    },
+                                    // AGAR 404 ERROR AAYE TOH YE CHALEGA
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        'assets/icon/icon.png',
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  )
+                                      : Image.asset(
+                                    'assets/icon/icon.png',
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),
@@ -149,8 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                    );
-                  });
+                    );                  });
                 },
               ),
             );
