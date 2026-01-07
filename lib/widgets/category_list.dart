@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../controller/category_controller.dart';
+import '../controller/category_byeventandfunction_controller.dart';
 import '../model/category_model.dart';
 
 class CategoryList extends StatefulWidget {
-  final dynamic clientId;
+  final dynamic eventId;
+  final dynamic functionId;
   final Function(MenuCategoryDetails) onCategorySelected;
 
   const CategoryList( {
     super.key,
-    required this.clientId,
+    required this.eventId,
+    required this.functionId,
     required this.onCategorySelected,
   });
 
@@ -19,7 +21,7 @@ class CategoryList extends StatefulWidget {
 }
 
 class _CategoryListState extends State<CategoryList> {
-  late final CategoryController controller = Get.put(CategoryController(clientId: widget.clientId));
+  late final CategoryyController controller = Get.put(CategoryyController(eventId: widget.eventId,functionId: widget.functionId));
   int selectedIndex = 0;
 
   @override
@@ -63,7 +65,7 @@ class _CategoryListState extends State<CategoryList> {
     return GestureDetector(
       onTap: () {
         setState(() => selectedIndex = index);
-        widget.onCategorySelected(category);
+        widget.onCategorySelected(category as MenuCategoryDetails);
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

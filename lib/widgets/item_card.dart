@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/controller/auth_controller.dart';
 import 'package:just_weding_software/controller/menu_controller.dart';
-import 'package:just_weding_software/model/menuitem_model.dart';
 import 'package:just_weding_software/widgets/responsive_layout.dart';
+import 'package:just_weding_software/model/category_response_model.dart';
 import 'responsive_screen.dart' as custom;
 
 class ItemCard extends StatefulWidget {
@@ -156,28 +156,29 @@ class _ItemCardState extends State<ItemCard> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 );
               },
-              errorBuilder: (_, __, ___) =>  Image.asset('assets/images/silverveg.jpg',)
+              errorBuilder: (_, __, ___) =>
+                  Image.asset('assets/images/silverveg.jpg'),
             )
-                :  Image.asset('assets/images/silverveg.jpg',)
+                : Image.asset('assets/images/silverveg.jpg'),
           ),
         ),
 
-        if (widget.quantity > 0 || isTablet)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: InkWell(
-              onTap: _showEditDialog,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.info_outline, size: 20),
+        // ✅ ALWAYS SHOW INFO ICON (Mobile + Tablet)
+        Positioned(
+          top: 8,
+          right: 8,
+          child: InkWell(
+            onTap: _showEditDialog,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
+              child: const Icon(Icons.info_outline, size: 20),
             ),
           ),
+        ),
       ],
     );
   }
@@ -327,8 +328,7 @@ class _ItemCardState extends State<ItemCard> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Obx(
-                        () => DropdownButtonFormField<String>(
+                  Obx(() => DropdownButtonFormField<String>(
                       value: selectedType.value,
                       items: const [
                         DropdownMenuItem(value: 'Veg', child: Text('Veg')),
@@ -353,6 +353,9 @@ class _ItemCardState extends State<ItemCard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red
+                          ),
                           onPressed: () => Get.back(),
                           child: const Text("Save"),
                         ),

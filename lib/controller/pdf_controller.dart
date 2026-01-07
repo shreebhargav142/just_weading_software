@@ -15,7 +15,6 @@ class PdfController extends GetxController {
       errorMessage("");
 
       final dio = Dio();
-      // Senior Tip: Add a timeout so the app doesn't hang forever
       dio.options.connectTimeout = const Duration(seconds: 15);
 
       final dir = await getApplicationDocumentsDirectory();

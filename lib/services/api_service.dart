@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_weding_software/model/captain_model.dart';
 import 'package:just_weding_software/model/function_model.dart';
 
+import '../model/category_response_model.dart';
 import '../model/menuitem_model.dart';
 import '../model/order_history_model.dart';
 import '../model/order_request_model.dart';
@@ -54,6 +55,7 @@ class ApiService {
     try {
       final response = await http.get(Uri.parse(url));
 
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         return MenuItemModel.fromJson(jsonData);
@@ -65,8 +67,32 @@ class ApiService {
       throw Exception('Failed to connect: $e');
     }
   }
+   // * itemdetailsbyeventidfunctionid
+  static Future<CategoryResponse?> fetchMenuData(int eventId, int functionId) async {
+    final url = Uri.parse("https://justwedding.in/WS/getitemdetailsbyeventandfunctionid/$eventId/$functionId");
 
-  // 4. fetch function
+    // STEP 1: Exact URL Print karein
+    debugPrint("Hitting URL: $url");
+
+    try {
+      final response = await http.get(url);
+
+      // STEP 2: Raw Response Body Print karein
+      debugPrint("Raw Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decodedData = json.decode(response.body);
+        if (decodedData['success'] == true) {
+          return CategoryResponse.fromJson(decodedData);
+        } else {
+          debugPrint("API logic failed: ${decodedData['msg']}");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching data: $e");
+    }
+    return null;
+  }  // 4. fetch function
 
   Future<FunctionModel?> fetchFunction(dynamic clientUserId) async {
     var url = Uri.parse(

@@ -14,7 +14,8 @@ class EventMenuController extends GetxController {
     required this.eventId,
     required this.functionId,});
   final ApiService _apiService = ApiService();
-  var isLoading = true.obs;
+  var isMenuLoading = true.obs;
+  var isTableLoading = false.obs;
   var errorMessage = ''.obs;
 
   var tableList = <dynamic>[].obs;
@@ -34,25 +35,31 @@ class EventMenuController extends GetxController {
   }
   var isPlacingOrder = false.obs;
 
+
   void fetchTables() async {
     try {
-      isLoading(true);
-      print("Fetching tables for User: $clientUserId, Event: $eventId, Function: $functionId");
+      isTableLoading(true);
       var response = await _apiService.getAssignedTables(
         clientUserId,
         eventId,
         functionId,
       );
+      print("Fetching tables with:");
+      print("clientUserId: $clientUserId");
+      print("eventId: $eventId");
+      print("functionId: $functionId");
 
-      if (response != null ) {
+      if (response != null && response.isNotEmpty) {
         tableList.assignAll(response);
+        debugPrint("Tables Loaded: ${tableList.length}");
       } else {
-        Get.snackbar("Error", "Could not find tables");
+        tableList.clear();
+        debugPrint("No tables found in API response");
       }
     } catch (e) {
       debugPrint("Controller Error: $e");
     } finally {
-      isLoading(false);
+      isTableLoading(false);
     }
   }
 
@@ -165,8 +172,13 @@ class EventMenuController extends GetxController {
 
   void getEventMenu() async {
     try {
-      isLoading(true);
-      var response = await _apiService.fetchMenu("471194", "23266");
+      isMenuLoading(true);
+      // var response = await _apiService.fetchMenu("471194", "23266");
+      var response = await _apiService.fetchMenu(
+        eventId.toString(),
+        functionId.toString(),
+      );
+
       errorMessage('');
       menuData.value = response;
 
@@ -177,7 +189,7 @@ class EventMenuController extends GetxController {
       errorMessage.value = "Failed to load menu: $e";
       print("Error: $e");
     } finally {
-      isLoading(false);
+      isMenuLoading(false);
     }
   }
 

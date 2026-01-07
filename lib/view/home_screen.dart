@@ -4,15 +4,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:just_weding_software/controller/function_controller.dart';
 import 'package:just_weding_software/view/screens/pdf_view.dart';
 import '../controller/auth_controller.dart';
-import '../controller/category_controller.dart';
+import '../controller/category_byeventandfunction_controller.dart';
 import '../controller/menu_controller.dart';
 import '../controller/order_history_controller.dart';
+import '../model/category_response_model.dart';
 import '../model/function_model.dart';
 import '../utils/date_utils.dart';
 import '../widgets/responsive_layout.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/cart_bottom.dart';
-import '../widgets/category_list.dart';
 import '../widgets/item_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,29 +25,46 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey<ScaffoldState>();
 
-  late final FunctionController functionController;
-  late final CategoryController categoryController;
-  late final EventMenuController eventMenuController;
-  late final OrderHistoryController historyController;
+  FunctionController? get functionController =>
+      Get.isRegistered<FunctionController>() ? Get.find<FunctionController>() : null;
+
+  OrderHistoryController get orderHistoryController => Get.find<OrderHistoryController>();
+  CategoryyController? get categoryyController =>
+      Get.isRegistered<CategoryyController>() ? Get.find<CategoryyController>() : null;
+
+  EventMenuController? get eventMenuController =>
+      Get.isRegistered<EventMenuController>() ? Get.find<EventMenuController>() : null;
+
+
+  final RxInt selectedCategoryId = 0.obs;
 
   @override
   void initState() {
     super.initState();
-    final authController = Get.find<AuthController>();
-    final id = authController.user.value?.clientUserId ?? 504;
-    final clientId = authController.user.value?.clientId ?? 512;
-    functionController = Get.put(FunctionController(clientUserId: id));
-    categoryController = Get.put(CategoryController(clientId: clientId));
+    _setupListeners();
 
-    final eventId = functionController.selectedFunction.value?.eventId ?? 471194;
-    final functionId = functionController.selectedFunction.value?.functionId ?? 23266;
-
-    eventMenuController = Get.put(EventMenuController(
-        clientUserId: id,
-        eventId: eventId,
-        functionId: functionId
-    ));
   }
+  void _setupListeners() {
+    ever(functionController!.selectedFunction, (selectedFunction) {
+      if (selectedFunction == null) return;
+
+      final auth = Get.find<AuthController>();
+      final userId = auth.user.value?.clientUserId ?? 504;
+      final eId = selectedFunction.eventId;
+      final fId = selectedFunction.functionId;
+
+      if (eId == null || fId == null) return;
+
+      if (!Get.isRegistered<CategoryyController>()) {
+        Get.put(CategoryyController(eventId: eId, functionId: fId));
+      }
+      if (!Get.isRegistered<EventMenuController>()) {
+        Get.put(EventMenuController(clientUserId: userId, eventId: eId, functionId: fId), permanent: true);
+      }
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Obx(() {
-                          final f = functionController.selectedFunction.value;
+                          final f = functionController?.selectedFunction.value;
                           return Text(
                             f == null ? 'Choose a function' : f.functionName ?? '',
                             style: GoogleFonts.nunito(fontSize: 16),
@@ -85,21 +102,27 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+
           Obx(() {
-            if (eventMenuController.isLoading.value) return const SizedBox.shrink();
-            final categories = eventMenuController.menuData.value?.data?.eventMenuPlanDetails ?? [];
+            final categories = categoryyController?.categories;
+            if (categoryyController?.isLoading.value ?? false) {
+              return const SizedBox(height: 100,
+                  child: Center(child: CircularProgressIndicator()));
+            }
+            if (categoryyController==null)
+              return const SizedBox(height: 100,);
 
             return SizedBox(
               height: 100,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
+                itemCount: categories?.length,
                 itemBuilder: (context, index) {
-                  final category = categories[index];
+                  final category = categories?[index];
                   return Obx(() {
-                    bool isSelected = eventMenuController.selectedCategoryId.value == category.menuCategoryId;
+                    bool isSelected = selectedCategoryId.value == category?.id;
                     return GestureDetector(
-                      onTap: () => eventMenuController.selectCategory(category.menuCategoryId),
+                      onTap: () => selectedCategoryId.value = category?.id ?? 0,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
@@ -118,18 +141,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(3.0),
                                 child: ClipOval(
-                                  child: (category.menuImage != null && category.menuImage!.isNotEmpty)
+                                  child: (category?.menuImage != null &&
+                                      category!.menuImage!.isNotEmpty)
                                       ? Image.network(
-                                    category.menuImage!,
-                                    fit: BoxFit.cover, // Image ko circle mein set karne ke liye
-                                    // Jab image load ho rahi ho
+                                    category!.menuImage!,
+                                    fit: BoxFit.cover,
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
                                       return const Center(
                                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
                                       );
                                     },
-                                    // AGAR 404 ERROR AAYE TOH YE CHALEGA
                                     errorBuilder: (context, error, stackTrace) {
                                       return Image.asset(
                                         'assets/icon/icon.png',
@@ -146,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 5),
                             Text(
-                              category.menuName ?? "",
+                              category?.menuname ?? "",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -166,7 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                    );                  });
+                    );
+                  });
+
                 },
               ),
             );
@@ -174,81 +198,115 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Container(height: 1, color: Colors.grey.withOpacity(0.1)),
           Expanded(
-            child: ResponsiveDiffLayout(
-              MobileBody: _buildItemsGrid(),
-              TabletBody: _buildItemsList(),
-            ),
+            child: Obx(() {
+              final items = categoryyController?.itemsByCategoryId[selectedCategoryId.value] ?? [];
+
+              if (categoryyController!.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return ResponsiveDiffLayout(
+                MobileBody: _buildItemsGrid(items),
+                TabletBody: _buildItemsList(items),
+              );
+            }),
           ),
         ],
       ),
+      // bottomNavigationBar: Obx(() {
+      //   if (eventMenuController == null) {
+      //     return const SizedBox.shrink();
+      //   }
+      //
+      //   final totalItems = eventMenuController!
+      //       .quantities.values
+      //       .fold(0, (sum, qty) => sum + qty);
+      //
+      //   return totalItems > 0
+      //       ? SafeArea(
+      //     child: CartBottomBar(
+      //       totalItems: totalItems,
+      //       onTap: () {},
+      //     ),
+      //   )
+      //       : const SizedBox.shrink();
+      // }),
       bottomNavigationBar: Obx(() {
-        int totalItems = eventMenuController.quantities.values.fold(0, (sum, qty) => sum + qty);
-        return totalItems > 0
-            ? SafeArea(child: CartBottomBar(totalItems: totalItems, onTap: () {}))
-            : const SizedBox.shrink();
-      }),
+
+        final _ = functionController!.selectedFunction.value;
+
+        if (!Get.isRegistered<EventMenuController>()) {
+          return const SizedBox.shrink();
+        }
+
+        final menuCtrl = Get.find<EventMenuController>();
+
+        final quantitiesMap = menuCtrl.quantities;
+
+        final totalItems = quantitiesMap.values.fold(0, (sum, qty) => sum + qty);
+
+        if (totalItems <= 0) {
+          return const SizedBox.shrink();
+        }
+
+        return SafeArea(
+          child: CartBottomBar(
+            totalItems: totalItems,
+            onTap: () {},
+          ),
+        );
+      }),    );
+  }
+  Widget _buildItemsGrid(List<ItemsDetails> items) {
+    if (items.isEmpty) {
+      return const Center(child: Text("No items available"));
+    }
+
+    return GridView.builder(
+        key: ValueKey(selectedCategoryId.value),
+       padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.65,
+        crossAxisSpacing: 14,
+        mainAxisSpacing: 14,
+      ),
+      itemCount: items.length,
+      itemBuilder: (_, index) {
+        final item = items[index];
+        return ItemCard(
+          quantity: eventMenuController?.quantities[item.itemId] ?? 0,
+          item: item,
+          onQuantityChanged: (change) {
+            eventMenuController?.updateQuantity(item.itemId!, change);
+          },
+          onEditToggle: () {},
+        );
+      },
     );
   }
-  Widget _buildItemsGrid() {
-    return Obx(() {
-      final items = eventMenuController.filteredItems;
 
-      if (items.isEmpty) {
-        return const Center(child: Text("No items available"));
-      }
+  Widget _buildItemsList(List<ItemsDetails> items) {
+    if (items.isEmpty) {
+      return const Center(child: Text("No items available"));
+    }
 
-      return GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 14,
-        ),
-        itemCount: items.length,
-        itemBuilder: (_, index) {
-          final item = items[index];
-          return ItemCard(
-            quantity: eventMenuController.quantities[item.itemId] ?? 0,
-            item: item,
-            onQuantityChanged: (change) {
-              eventMenuController.updateQuantity(item.itemId!, change);
-            },
-            onEditToggle: () {},
-          );
-        },
-      );
-    });
-  }
-
-  Widget _buildItemsList() {
-    return Obx(() {
-      final items = eventMenuController.filteredItems;
-
-      if (items.isEmpty) {
-        return const Center(child: Text("No items available"));
-      }
-
-      return ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (_, index) {
-          final item = items[index];
-          return SizedBox(
-            height: 140, // Tablet row height
-            child: ItemCard(
-              quantity: eventMenuController.quantities[item.itemId] ?? 0,
-              item: item,
-              onQuantityChanged: (change) {
-                eventMenuController.updateQuantity(item.itemId!, change);
-              },
-              onEditToggle: () {},
-            ),
-          );
-        },
-      );
-    });
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, index) {
+        final item = items[index];
+        return ItemCard(
+          quantity: eventMenuController?.quantities[item.itemId] ?? 0,
+          item: item,
+          onQuantityChanged: (change) {
+            eventMenuController?.updateQuantity(item.itemId!, change);
+          },
+          onEditToggle: () {},
+        );
+      },
+    );
   }
 
 
@@ -340,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openFunctionSelectorDialog() {
     final tempSelected =
     Rx<FunctionManagerAssignDetails?>(
-      functionController.selectedFunction.value,
+      functionController?.selectedFunction.value,
     );
     Get.dialog(
       Center(
@@ -369,14 +427,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Obx(() => ListView.builder(
                       shrinkWrap: true,
                       itemCount:
-                      functionController.functionList.length,
+                      functionController?.functionList.length,
                       itemBuilder: (_, index) {
                         final item =
-                        functionController.functionList[index];
+                        functionController?.functionList[index];
 
                         final isSelected =
                             tempSelected.value?.functionId ==
-                                item.functionId;
+                                item?.functionId;
 
                         return InkWell(
                           onTap: () => tempSelected.value = item,
@@ -401,21 +459,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                     CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Event Name : ${item.eventName ?? ''}",
+                                        "Event Name : ${item?.eventName ?? ''}",
                                         style: GoogleFonts.nunito(
                                             fontWeight:
                                             FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Function Name : ${item.functionName ?? ''}",
+                                        "Function Name : ${item?.functionName ?? ''}",
                                         style:
                                         GoogleFonts.nunito( fontWeight:
                                         FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Date : ${formatDate(item.startTime)}",
+                                        "Date : ${formatDate(item?.startTime)}",
                                         style: GoogleFonts.nunito(
                                             fontWeight: FontWeight.w600                                        ),
                                       ),
@@ -468,13 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {
-                            if (tempSelected.value != null) {
-                              functionController.onFunctionChanged(
-                                  tempSelected.value);
-                              historyController.fetchHistory(
-                                  historyController.selectedTab.value);
-                            }
+                          onPressed: (){
                             Get.back();
                           },
                           child: const Text("Done"),
@@ -490,4 +542,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
 }
+

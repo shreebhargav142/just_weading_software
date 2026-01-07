@@ -75,8 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
     Future.delayed(const Duration(seconds: 2), () => overlayEntry.remove());
   }
 
-  // --- VALIDATION LOGIC ---
-// --- VALIDATION LOGIC ---
   Future<void> _validateAndLogin() async {
     String username = authController.usernameController.text.trim();
     String password = authController.passwordController.text.trim();
@@ -88,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.red.shade700,
         iconPath: 'assets/icon/icon.png',
       );
-      return; // Yahin se wapas chala jayega, niche wala login call nahi hoga
+      return;
     }
 
     if (password.length < 6) {
@@ -100,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Agar upar ki sab validation sahi hai, tabhi Login API call hogi
     bool success = await authController.login();
 
     if (!success) {
@@ -166,7 +163,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 10),
 
-                  // LOGIN BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -195,7 +191,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Helper to keep code clean
   InputDecoration _buildInputDecoration(String hint) {
     return InputDecoration(
       filled: true,

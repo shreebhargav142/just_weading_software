@@ -37,15 +37,11 @@ class _CartBottomBarState extends State<CartBottomBar> {
     functionController = Get.find<FunctionController>();
     final authController = Get.find<AuthController>();
 
-    final id = authController.user.value?.clientUserId ?? 502;
-    final eventId = functionController.selectedFunction.value?.eventId ?? 471194;
-    final functionId = functionController.selectedFunction.value?.functionId ?? 23266;
+    // final id = authController.user.value?.clientUserId ?? 502;
+    // final eventId = functionController.selectedFunction.value?.eventId ?? 471194;
+    // final functionId = functionController.selectedFunction.value?.functionId ?? 23266;
 
-    try {
-      Get.find<EventMenuController>();
-    } catch (e) {
-      Get.put(EventMenuController(clientUserId: id, eventId: eventId, functionId: functionId));
-    }
+
   }
   @override
   Widget build(BuildContext context) {
@@ -125,97 +121,169 @@ class _CartBottomBarState extends State<CartBottomBar> {
       ),
     );
   }
-
   void _showTableSelectionDialog(BuildContext context) {
+    final menuController = Get.find<EventMenuController>();
+
     showDialog(
       context: context,
-        builder: (BuildContext context) {
-          final menuController = Get.find<EventMenuController>();
-
-          if (menuController.tableList.isEmpty) {
-            menuController.fetchTables();
-          }
-
+      builder: (_) {
         return AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)),
-            title: Text(
-              "Select Table",
-              style: GoogleFonts.nunito(
-                  fontWeight: FontWeight.bold, fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            content: SizedBox(
-                width: double.maxFinite,
-                child: Obx(() {
-                  if (menuController.isLoading.value) {
-                    return const SizedBox(
-                      height: 100,
-                      child: Center(child: CircularProgressIndicator(
-                          color: Color(0xFFD62E38))),
-                    );
-                  }
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            "Select Table",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Obx(() {
+              if (menuController.isMenuLoading.value) {
+                return const SizedBox(
+                  height: 120,
+                  child: Center(
+                    child: CircularProgressIndicator(color: Color(0xFFD62E38)),
+                  ),
+                );
+              }
 
-                  if (menuController.tableList.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Text("No tables available",
+              if (menuController.tableList.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    "No tables available",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.nunito(color: Colors.grey),
+                  ),
+                );
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: menuController.tableList.length,
+                itemBuilder: (_, index) {
+                  final table = menuController.tableList[index];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InkWell(
+                      onTap: () {
+                        menuController.selectedTableId.value =
+                            table['tableId'].toString();
+                        Get.back();
+                        _showSuccessPopup(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFD62E38)),
+                        ),
+                        child: Text(
+                          table['tableName'] ?? 'N/A',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.nunito(color: Colors.grey)),
-                    );
-                  }
-
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Divider(),
-                      const SizedBox(height: 10),
-                      Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: menuController.tableList.length,
-                          itemBuilder: (context, index) {
-                            final table = menuController.tableList[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: InkWell(
-                                onTap: () {
-                                  menuController.selectedTableId.value =
-                                      table['tableId'].toString();
-                                  Get.back();
-                                  _showSuccessPopup(context);
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: const Color(0xFFD62E38),
-                                        width: 1),
-                                  ),
-                                  child: Text(
-                                    // Correct Key: tableName
-                                    "${table['tableName'] ?? 'N/A'}",
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.nunito(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                          style: GoogleFonts.nunito(fontWeight: FontWeight.w600),
                         ),
                       ),
-                    ],
+                    ),
                   );
-                },)));
-      });
-      }
+                },
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+
+  // void _showTableSelectionDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //       builder: (BuildContext context) {
+  //         final menuController = Get.find<EventMenuController>();
+  //
+  //         if (menuController.tableList.isEmpty) {
+  //           menuController.fetchTables();
+  //         }
+  //
+  //       return AlertDialog(
+  //           shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(20)),
+  //           title: Text(
+  //             "Select Table",
+  //             style: GoogleFonts.nunito(
+  //                 fontWeight: FontWeight.bold, fontSize: 18),
+  //             textAlign: TextAlign.center,
+  //           ),
+  //           content: SizedBox(
+  //               width: double.maxFinite,
+  //               child: Obx(() {
+  //                 if (menuController.isLoading.value) {
+  //                   return const SizedBox(
+  //                     height: 100,
+  //                     child: Center(child: CircularProgressIndicator(
+  //                         color: Color(0xFFD62E38))),
+  //                   );
+  //                 }
+  //
+  //                 if (menuController.tableList.isEmpty) {
+  //                   return Padding(
+  //                     padding: const EdgeInsets.symmetric(vertical: 20),
+  //                     child: Text("No tables available",
+  //                         textAlign: TextAlign.center,
+  //                         style: GoogleFonts.nunito(color: Colors.grey)),
+  //                   );
+  //                 }
+  //
+  //                 return Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   children: [
+  //                     const Divider(),
+  //                     const SizedBox(height: 10),
+  //                     Flexible(
+  //                       child: ListView.builder(
+  //                         shrinkWrap: true,
+  //                         itemCount: menuController.tableList.length,
+  //                         itemBuilder: (context, index) {
+  //                           final table = menuController.tableList[index];
+  //                           return Padding(
+  //                             padding: const EdgeInsets.only(bottom: 10),
+  //                             child: InkWell(
+  //                               onTap: () {
+  //                                 menuController.selectedTableId.value =
+  //                                     table['tableId'].toString();
+  //                                 Get.back();
+  //                                 _showSuccessPopup(context);
+  //                               },
+  //                               child: Container(
+  //                                 width: double.infinity,
+  //                                 padding: const EdgeInsets.symmetric(
+  //                                     vertical: 12),
+  //                                 decoration: BoxDecoration(
+  //                                   color: Colors.grey.shade100,
+  //                                   borderRadius: BorderRadius.circular(10),
+  //                                   border: Border.all(
+  //                                       color: const Color(0xFFD62E38),
+  //                                       width: 1),
+  //                                 ),
+  //                                 child: Text(
+  //                                   // Correct Key: tableName
+  //                                   "${table['tableName'] ?? 'N/A'}",
+  //                                   textAlign: TextAlign.center,
+  //                                   style: GoogleFonts.nunito(
+  //                                     fontWeight: FontWeight.w600,
+  //                                     color: Colors.black,
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           );
+  //                         },
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 );
+  //               },)));
+  //     });
+  //     }
   void _showSuccessPopup(BuildContext context) {
     showDialog(
       context: context,

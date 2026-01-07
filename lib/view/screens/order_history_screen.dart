@@ -286,7 +286,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       barrierColor: Colors.black.withOpacity(0.4),
     );
   }
-
   Widget _buildTabSelector(bool isTablet) {
     return Container(
       height: isTablet ? 70 : 60,
