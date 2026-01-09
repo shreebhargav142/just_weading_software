@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
 }*/
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:just_weding_software/utils/initial_binding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:just_weding_software/view/initial_screen/splash.dart';
 

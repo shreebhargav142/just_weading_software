@@ -1,69 +1,128 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../model/menuitem_model.dart';
 import '../services/api_service.dart';
 import '../view/screens/order_history_screen.dart';
+import 'auth_controller.dart';
+import 'function_controller.dart';
 
 class EventMenuController extends GetxController {
-  final dynamic clientUserId;
-  final dynamic eventId;
-  final dynamic functionId;
-
-  EventMenuController({
-    required this.clientUserId,
-    required this.eventId,
-    required this.functionId,});
   final ApiService _apiService = ApiService();
-  var isMenuLoading = true.obs;
-  var isTableLoading = false.obs;
-  var errorMessage = ''.obs;
 
-  var tableList = <dynamic>[].obs;
-  var selectedTableId = ''.obs;
-  var menuData = Rxn<MenuItemModel>();
-  var selectedCategoryId = 0.obs;
-  var filteredItems = <ItemsDetails>[].obs;
+  final isMenuLoading = true.obs;
+  final isTableLoading = false.obs;
+  final errorMessage = ''.obs;
 
-  var quantities = <int, int>{}.obs;
+  final tableList = <dynamic>[].obs;
+  final selectedTableId = ''.obs;
 
+  final menuData = Rxn<MenuItemModel>();
+  final selectedCategoryId = 0.obs;
+  final filteredItems = <ItemsDetails>[].obs;
+
+  final quantities = <int, int>{}.obs;
+  final isPlacingOrder = false.obs;
+
+  final AuthController authController = Get.find<AuthController>();
+  final FunctionController functionController = Get.find<FunctionController>();
 
   @override
   void onInit() {
     super.onInit();
-    getEventMenu();
-    fetchTables();
   }
-  var isPlacingOrder = false.obs;
+  Future<void> loadEventMenu() async {
+    final clientUserId =
+    authController.user.value?.clientUserId?.toString();
+    final eventId =
+    functionController.selectedFunction.value?.eventId?.toString();
+    final functionId =
+    functionController.selectedFunction.value?.functionId?.toString();
 
+    if (clientUserId == null || eventId == null || functionId == null) {
+      debugPrint("EventMenu IDs not ready");
+      return;
+    }
+    isMenuLoading(true);
 
-  void fetchTables() async {
+    await Future.wait([
+      fetchTables(clientUserId, eventId, functionId),
+      _getEventMenu(eventId, functionId),
+    ]);
+  }
+
+  Future<void> fetchTables(
+      String clientUserId,
+      String eventId,
+      String functionId,
+      ) async {
     try {
-      isTableLoading(true);
-      var response = await _apiService.getAssignedTables(
+      final response = await _apiService.getAssignedTables(
         clientUserId,
         eventId,
         functionId,
       );
-      print("Fetching tables with:");
-      print("clientUserId: $clientUserId");
-      print("eventId: $eventId");
-      print("functionId: $functionId");
 
       if (response != null && response.isNotEmpty) {
         tableList.assignAll(response);
-        debugPrint("Tables Loaded: ${tableList.length}");
       } else {
         tableList.clear();
-        debugPrint("No tables found in API response");
       }
     } catch (e) {
-      debugPrint("Controller Error: $e");
+      debugPrint("fetchTables Error: $e");
     } finally {
       isTableLoading(false);
     }
   }
 
-  void placeOrder() async {
+  Future<void> _getEventMenu(String eventId, String functionId) async {
+    try {
+
+      final response = await _apiService.fetchMenu(eventId, functionId);
+      menuData.value = response;
+      errorMessage('');
+
+      final categories =
+          menuData.value?.data?.eventMenuPlanDetails;
+      if (categories != null && categories.isNotEmpty) {
+        selectCategory(categories.first.menuCategoryId);
+      }
+    } catch (e) {
+      errorMessage.value = "Failed to load menu: $e";
+    } finally {
+      isMenuLoading(false);
+    }
+  }
+
+  void selectCategory(int? categoryId) {
+    if (categoryId == null) return;
+
+    selectedCategoryId.value = categoryId;
+
+    final details =
+        menuData.value?.data?.eventMenuPlanDetails;
+
+    if (details != null && details.isNotEmpty) {
+      final category = details.firstWhere(
+            (e) => e.menuCategoryId == categoryId,
+        orElse: () => details.first,
+      );
+      filteredItems.assignAll(category.itemsDetails ?? []);
+    }
+  }
+
+  void updateQuantity(int itemId, int change) {
+    final current = quantities[itemId] ?? 0;
+    final updated = current + change;
+
+    if (updated <= 0) {
+      quantities.remove(itemId);
+    } else {
+      quantities[itemId] = updated;
+    }
+  }
+  Future<void> placeOrder() async {
     if (quantities.isEmpty) {
       Get.snackbar("Cart Empty", "Please add items to place an order");
       return;
@@ -74,21 +133,40 @@ class EventMenuController extends GetxController {
       return;
     }
 
+    final authController = Get.find<AuthController>();
+    final functionController = Get.find<FunctionController>();
+
+    final String? clientUserId =
+    authController.user.value?.clientUserId?.toString();
+    final String? eventId =
+    functionController.selectedFunction.value?.eventId?.toString();
+    final String? functionId =
+    functionController.selectedFunction.value?.functionId?.toString();
+
+    if (clientUserId == null || eventId == null || functionId == null) {
+      Get.snackbar("Error", "Event / Function not selected");
+      return;
+    }
+
     try {
       isPlacingOrder(true);
 
-      List<Map<String, dynamic>> itemsList = [];
-      for (var item in selectedCartItems) {
-        int dynamicCatId = 0;
-        String dynamicCatName = "";
+      final List<Map<String, dynamic>> itemsList = [];
 
-        final allCategories = menuData.value?.data?.eventMenuPlanDetails;
-        if (allCategories != null) {
-          for (var category in allCategories) {
-            bool containsItem = category.itemsDetails?.any((i) => i.itemId == item.itemId) ?? false;
+      for (final item in selectedCartItems) {
+        int menuCatId = 0;
+        String menuCatName = "";
+
+        final categories = menuData.value?.data?.eventMenuPlanDetails;
+        if (categories != null) {
+          for (final category in categories) {
+            final containsItem = category.itemsDetails
+                ?.any((i) => i.itemId == item.itemId) ??
+                false;
+
             if (containsItem) {
-              dynamicCatId = category.menuCategoryId ?? 0;
-              dynamicCatName = category.menuName ?? "";
+              menuCatId = category.menuCategoryId ?? 0;
+              menuCatName = category.menuName ?? "";
               break;
             }
           }
@@ -100,113 +178,64 @@ class EventMenuController extends GetxController {
           "qty": quantities[item.itemId] ?? 0,
           "instruction": "",
           "mealType": "Normal",
-          "menuCatId": dynamicCatId,
-          "menuCatName": dynamicCatName
+          "menuCatId": menuCatId,
+          "menuCatName": menuCatName,
         });
       }
 
-      Map<String, dynamic> orderBody = {
+      final Map<String, dynamic> orderBody = {
         "clientUserId": clientUserId,
         "eventId": eventId,
         "functionId": functionId,
         "tableId": int.tryParse(selectedTableId.value) ?? 0,
-        "itemDetails": itemsList
+        "itemDetails": itemsList,
       };
 
-      // 4. API Call
-      var response = await _apiService.addOrderTable(orderBody);
+      final response = await _apiService.addOrderTable(orderBody);
 
-      if (response['success'] == true) {
-        quantities.clear(); // Success par cart clear karein
-        Get.snackbar("Success", response['msg'] ?? "Order placed successfully!",
-            snackPosition: SnackPosition.BOTTOM);
+      if (response != null && response['success'] == true) {
+        quantities.clear();
 
-        Future.delayed(const Duration(seconds: 1), () {
-          Get.to(() => OrderHistoryScreen(
+        Get.snackbar(
+          "Success",
+          response['msg'] ?? "Order placed successfully!",
+          snackPosition: SnackPosition.BOTTOM,
+        );
 
-          ));
+        Future.delayed(const Duration(milliseconds: 600), () {
+          Get.to(() => const OrderHistoryScreen());
         });
       } else {
-        Get.snackbar("Error", response['msg'] ?? "Failed to place order",
-            backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar(
+          "Error",
+          response?['msg'] ?? "Failed to place order",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e");
+      Get.snackbar("Error", "Something went wrong");
+      debugPrint("placeOrder error: $e");
     } finally {
       isPlacingOrder(false);
     }
   }
+
+
   void clearCart() {
     quantities.clear();
-    print("Order Cancelled");
   }
 
-  void selectCategory(int? categoryId) {
-    if (categoryId == null) return;
-
-    selectedCategoryId.value = categoryId;
-
-    final details = menuData.value?.data?.eventMenuPlanDetails;
-
-    if (details != null && details.isNotEmpty) {
-      final category = details.firstWhere(
-            (cat) => cat.menuCategoryId == categoryId,
-        orElse: () => details[0],
-      );
-      filteredItems.assignAll(category.itemsDetails ?? []);
-    }
+  List<ItemsDetails> get selectedCartItems {
+    final allItems = <ItemsDetails>[];
+    menuData.value?.data?.eventMenuPlanDetails?.forEach((c) {
+      allItems.addAll(c.itemsDetails ?? []);
+    });
+    return allItems
+        .where((item) => quantities.containsKey(item.itemId))
+        .toList();
   }
 
-  void updateQuantity(int itemId, int change) {
-    int currentQty = quantities[itemId] ?? 0;
-    int newQty = currentQty + change;
-
-    if (newQty <= 0) {
-      quantities.remove(itemId);
-    } else {
-      quantities[itemId] = newQty;
-    }
-
-    print("Item $itemId quantity: ${quantities[itemId]}");
-  }
-
-  void getEventMenu() async {
-    try {
-      isMenuLoading(true);
-      // var response = await _apiService.fetchMenu("471194", "23266");
-      var response = await _apiService.fetchMenu(
-        eventId.toString(),
-        functionId.toString(),
-      );
-
-      errorMessage('');
-      menuData.value = response;
-
-      if (menuData.value?.data?.eventMenuPlanDetails?.isNotEmpty ?? false) {
-        selectCategory(menuData.value!.data!.eventMenuPlanDetails![0].menuCategoryId);
-      }
-    } catch (e) {
-      errorMessage.value = "Failed to load menu: $e";
-      print("Error: $e");
-    } finally {
-      isMenuLoading(false);
-    }
-  }
-
-  void toggleFavorite(int itemId) {
-    menuData.refresh();
-  }
-
- List<ItemsDetails> get selectedCartItems {
-   List<ItemsDetails> allItems = [];
-
-   menuData.value?.data?.eventMenuPlanDetails?.forEach((category) {
-     if(category.itemsDetails!=null){
-       allItems.addAll(category.itemsDetails!);
-
-     }
-   });
-   return allItems.where((item)=>quantities.containsKey(item.itemId)).toList();
- }
- int get totalCartItemsCount =>quantities.values.fold(0, (sum, qty) => sum + qty);
+  int get totalCartItemsCount =>
+      quantities.values.fold(0, (sum, qty) => sum + qty);
 }

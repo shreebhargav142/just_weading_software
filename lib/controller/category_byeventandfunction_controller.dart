@@ -1,43 +1,49 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 import '../model/category_response_model.dart';
 import '../services/api_service.dart';
+import 'function_controller.dart';
 
 class CategoryyController extends GetxController {
-   dynamic eventId;
-   dynamic functionId;
+  final isLoading = true.obs;
 
-  CategoryyController({required this.eventId, required this.functionId});
+  final categories = <MenuCategoryDetails>[].obs;
+  final itemsByCategoryId = <int, List<ItemsDetails>>{}.obs;
 
-  var isLoading = true.obs;
-  var categories = <MenuCategoryDetails>[].obs;
-  var itemsByCategoryId = <int, List<ItemsDetails>>{}.obs;
+  final RxInt selectedCategoryId = 0.obs;
 
-  @override
-  void onInit() {
-    fetchApiData();
-    super.onInit();
-  }
-  void fetchDataWithNewIds({required int newEventId, required int newFunctionId}) {
-    this.eventId = newEventId;
-    this.functionId = newFunctionId;
-    fetchApiData();
-  }
-  void fetchApiData() async {
+  final FunctionController functionController =
+  Get.find<FunctionController>();
+
+  Future<void> fetchApiData(String eventId, String functionId) async {
+    if (eventId == "0" || functionId == "0") return;
+
     try {
       isLoading(true);
-      var response = await ApiService.fetchMenuData(eventId, functionId);
-      if (response != null && response.data != null) {
-        categories.clear();
-        itemsByCategoryId.clear();
+      final response =
+      await ApiService.fetchMenuData(eventId, functionId);
 
-        for (var entry in response.data!) {
-          if (entry.menuDetails != null) {
-            categories.add(entry.menuDetails! as MenuCategoryDetails);
-            itemsByCategoryId[entry.menuDetails!.id!] = entry.itemDetails ?? [];
-          }
+      categories.clear();
+      itemsByCategoryId.clear();
+
+      final data = response?.data ?? [];
+
+      for (final entry in data) {
+        if (entry.menuDetails != null) {
+          final menu = entry.menuDetails!;
+          categories.add(menu);
+          itemsByCategoryId[menu.id!] =
+              entry.itemDetails ?? [];
         }
       }
+
+      if (categories.isNotEmpty) {
+        selectedCategoryId.value = categories.first.id ?? 0;
+      }
+    } catch (e) {
+      debugPrint("CategoryController Error: $e");
     } finally {
       isLoading(false);
     }
@@ -47,3 +53,4 @@ class CategoryyController extends GetxController {
     return itemsByCategoryId[categoryId] ?? [];
   }
 }
+

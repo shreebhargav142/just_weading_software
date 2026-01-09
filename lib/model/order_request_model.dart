@@ -1,7 +1,7 @@
 class OrderRequest {
   final int clientUserId;
-  final int eventId;
-  final int functionId;
+  final String eventId;
+  final String functionId;
   final int tableId;
   final List<OrderItemDetail> itemDetails;
 

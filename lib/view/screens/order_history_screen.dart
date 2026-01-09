@@ -28,7 +28,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   void initState() {
     super.initState();
     functionController = Get.find<FunctionController>();
-    final clientId = authController.user.value?.clientUserId ?? 504;
+    final clientUserId = authController.user.value?.clientUserId ?? 504;
     final eventId = functionController.selectedFunction.value?.eventId ?? 471194;
     final functionId = functionController.selectedFunction.value?.functionId ?? 23266;
 
@@ -37,9 +37,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     }
     historyController = Get.put(
       OrderHistoryController(
-        clientId: clientId,
-        eventId: eventId,
-        functionId: functionId,
         isCaptain: authController.isCaptain,
       ),
     );
@@ -349,7 +346,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         itemCount: historyController.tableOrders.length,
         itemBuilder: (_, index) {
           return _buildTableCard(
-            historyController.tableOrders[index],
+            historyController.tableOrders[index] as Data,
             index,
             isCaptain,
             isTablet,

@@ -24,47 +24,39 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey<ScaffoldState>();
+final FunctionController functionController = Get.put(FunctionController());
+  final CategoryyController categoryyController = Get.put(CategoryyController());
+  final EventMenuController eventMenuController = Get.put(EventMenuController());
+  late final OrderHistoryController historyController;
 
-  FunctionController? get functionController =>
-      Get.isRegistered<FunctionController>() ? Get.find<FunctionController>() : null;
+  // final OrderHistoryController historyController = Get.put(OrderHistoryController(isCaptain:true));
 
-  OrderHistoryController get orderHistoryController => Get.find<OrderHistoryController>();
-  CategoryyController? get categoryyController =>
-      Get.isRegistered<CategoryyController>() ? Get.find<CategoryyController>() : null;
-
-  EventMenuController? get eventMenuController =>
-      Get.isRegistered<EventMenuController>() ? Get.find<EventMenuController>() : null;
-
-
-  final RxInt selectedCategoryId = 0.obs;
 
   @override
   void initState() {
     super.initState();
     _setupListeners();
-
+    historyController=Get.put(OrderHistoryController(isCaptain: true));
   }
   void _setupListeners() {
-    ever(functionController!.selectedFunction, (selectedFunction) {
+    ever<FunctionManagerAssignDetails?>(
+        functionController.selectedFunction, (selectedFunction) {
       if (selectedFunction == null) return;
 
       final auth = Get.find<AuthController>();
-      final userId = auth.user.value?.clientUserId ?? 504;
-      final eId = selectedFunction.eventId;
-      final fId = selectedFunction.functionId;
+      final String clienUserId = auth.user.value?.clientUserId?.toString() ?? "504";
 
-      if (eId == null || fId == null) return;
+      final String eventId = selectedFunction.eventId?.toString() ?? "0";
+      final String functionId = selectedFunction.functionId?.toString() ?? "0";
 
-      if (!Get.isRegistered<CategoryyController>()) {
-        Get.put(CategoryyController(eventId: eId, functionId: fId));
-      }
-      if (!Get.isRegistered<EventMenuController>()) {
-        Get.put(EventMenuController(clientUserId: userId, eventId: eId, functionId: fId), permanent: true);
-      }
+      if(eventId=="0"|| functionId=="0") return;
+
+
+      categoryyController.fetchApiData(eventId, functionId);
+      eventMenuController.fetchTables(clienUserId,eventId,functionId);
+      historyController.updateContext( eventId: eventId, functionId: functionId, clientUserId: clienUserId);
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Obx(() {
-                          final f = functionController?.selectedFunction.value;
+                          final f = functionController.selectedFunction.value;
                           return Text(
                             f == null ? 'Choose a function' : f.functionName ?? '',
                             style: GoogleFonts.nunito(fontSize: 16),
@@ -104,8 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           Obx(() {
-            final categories = categoryyController?.categories;
-            if (categoryyController?.isLoading.value ?? false) {
+            final categories = categoryyController.categories;
+            if (categoryyController.isLoading.value ?? false) {
               return const SizedBox(height: 100,
                   child: Center(child: CircularProgressIndicator()));
             }
@@ -116,13 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 100,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: categories?.length,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  final category = categories?[index];
+                  final category = categories[index];
                   return Obx(() {
-                    bool isSelected = selectedCategoryId.value == category?.id;
+                    bool isSelected = categoryyController.selectedCategoryId.value == category.id;
                     return GestureDetector(
-                      onTap: () => selectedCategoryId.value = category?.id ?? 0,
+                      onTap: () => categoryyController.selectedCategoryId.value = category.id ?? 0,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
@@ -141,10 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(3.0),
                                 child: ClipOval(
-                                  child: (category?.menuImage != null &&
-                                      category!.menuImage!.isNotEmpty)
+                                  child: (category.menuImage != null &&
+                                      category.menuImage!.isNotEmpty)
                                       ? Image.network(
-                                    category!.menuImage!,
+                                    category.menuImage!,
                                     fit: BoxFit.cover,
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
@@ -168,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 5),
                             Text(
-                              category?.menuname ?? "",
+                              category.menuname ?? "",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -190,8 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   });
-
-                },
+                  },
               ),
             );
           }),
@@ -199,12 +190,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(height: 1, color: Colors.grey.withOpacity(0.1)),
           Expanded(
             child: Obx(() {
-              final items = categoryyController?.itemsByCategoryId[selectedCategoryId.value] ?? [];
+              final items = categoryyController.itemsByCategoryId[categoryyController.selectedCategoryId.value] ?? [];
 
-              if (categoryyController!.isLoading.value) {
+              if (categoryyController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
-
               return ResponsiveDiffLayout(
                 MobileBody: _buildItemsGrid(items),
                 TabletBody: _buildItemsList(items),
@@ -213,42 +203,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // bottomNavigationBar: Obx(() {
-      //   if (eventMenuController == null) {
-      //     return const SizedBox.shrink();
-      //   }
-      //
-      //   final totalItems = eventMenuController!
-      //       .quantities.values
-      //       .fold(0, (sum, qty) => sum + qty);
-      //
-      //   return totalItems > 0
-      //       ? SafeArea(
-      //     child: CartBottomBar(
-      //       totalItems: totalItems,
-      //       onTap: () {},
-      //     ),
-      //   )
-      //       : const SizedBox.shrink();
-      // }),
       bottomNavigationBar: Obx(() {
-
-        final _ = functionController!.selectedFunction.value;
-
+        final _ = functionController.selectedFunction.value;
         if (!Get.isRegistered<EventMenuController>()) {
           return const SizedBox.shrink();
         }
-
         final menuCtrl = Get.find<EventMenuController>();
-
         final quantitiesMap = menuCtrl.quantities;
-
         final totalItems = quantitiesMap.values.fold(0, (sum, qty) => sum + qty);
-
         if (totalItems <= 0) {
           return const SizedBox.shrink();
         }
-
         return SafeArea(
           child: CartBottomBar(
             totalItems: totalItems,
@@ -263,8 +228,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return GridView.builder(
-        key: ValueKey(selectedCategoryId.value),
-       padding: const EdgeInsets.all(16),
+      key: ValueKey(categoryyController.selectedCategoryId.value),
+      padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.65,
@@ -275,10 +240,10 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (_, index) {
         final item = items[index];
         return ItemCard(
-          quantity: eventMenuController?.quantities[item.itemId] ?? 0,
+          quantity: eventMenuController.quantities[item.itemId] ?? 0,
           item: item,
           onQuantityChanged: (change) {
-            eventMenuController?.updateQuantity(item.itemId!, change);
+            eventMenuController.updateQuantity(item.itemId!, change);
           },
           onEditToggle: () {},
         );
@@ -298,10 +263,10 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (_, index) {
         final item = items[index];
         return ItemCard(
-          quantity: eventMenuController?.quantities[item.itemId] ?? 0,
+          quantity: eventMenuController.quantities[item.itemId] ?? 0,
           item: item,
           onQuantityChanged: (change) {
-            eventMenuController?.updateQuantity(item.itemId!, change);
+            eventMenuController.updateQuantity(item.itemId!, change);
           },
           onEditToggle: () {},
         );
@@ -336,23 +301,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         flexibleSpace: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/appbar_img.png',
-                fit: BoxFit.cover, // Ensure it fills the height
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/appbar_img.png',
+                  fit: BoxFit.cover, // Ensure it fills the height
+                ),
               ),
-            ),
 
-            // 2. Overlay for readability
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withOpacity(0.2), // Light tint
+              // 2. Overlay for readability
+              Positioned.fill(
+                child: Container(
+                  color: Colors.white.withOpacity(0.2), // Light tint
+                ),
               ),
-            ),
 
-            // 3. Content - Using Padding instead of just Center],
-        ]),
+            ]),
         actions: [
           Align(
             alignment: Alignment.center,
@@ -398,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openFunctionSelectorDialog() {
     final tempSelected =
     Rx<FunctionManagerAssignDetails?>(
-      functionController?.selectedFunction.value,
+      functionController.selectedFunction.value,
     );
     Get.dialog(
       Center(
@@ -427,14 +391,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Obx(() => ListView.builder(
                       shrinkWrap: true,
                       itemCount:
-                      functionController?.functionList.length,
+                      functionController.functionList.length,
                       itemBuilder: (_, index) {
                         final item =
-                        functionController?.functionList[index];
+                        functionController.functionList[index];
 
                         final isSelected =
                             tempSelected.value?.functionId ==
-                                item?.functionId;
+                                item.functionId;
 
                         return InkWell(
                           onTap: () => tempSelected.value = item,
@@ -459,21 +423,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                     CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Event Name : ${item?.eventName ?? ''}",
+                                        "Event Name : ${item.eventName ?? ''}",
                                         style: GoogleFonts.nunito(
                                             fontWeight:
                                             FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Function Name : ${item?.functionName ?? ''}",
+                                        "Function Name : ${item.functionName ?? ''}",
                                         style:
                                         GoogleFonts.nunito( fontWeight:
                                         FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Date : ${formatDate(item?.startTime)}",
+                                        "Date : ${formatDate(item.startTime)}",
                                         style: GoogleFonts.nunito(
                                             fontWeight: FontWeight.w600                                        ),
                                       ),
@@ -527,6 +491,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           onPressed: (){
+                            if (tempSelected.value != null) {
+                              functionController.onFunctionChanged(tempSelected.value);
+
+                              print("Selected Event: ${tempSelected.value!.eventId}");
+                            }
                             Get.back();
                           },
                           child: const Text("Done"),
@@ -544,4 +513,3 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 }
-

@@ -211,7 +211,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         final authController = Get.find<AuthController>();
                         final id = authController.user.value?.clientUserId ?? 504;
                         Get.to(() => const FunctionListScreen(), binding: BindingsBuilder(() {
-                          Get.put(FunctionController(clientUserId: id));
+                          Get.put(FunctionController());
                         }));
                       }                  ),
                   ListTile(
