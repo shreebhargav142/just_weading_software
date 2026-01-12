@@ -44,9 +44,7 @@ class CartScreen extends StatelessWidget {
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final item = cartItems[index];
-            print(item.itemName);
             final qty = controller.quantities[item.itemId] ?? 0;
-
             return Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

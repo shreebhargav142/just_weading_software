@@ -51,9 +51,9 @@ class FunctionManagerAssignDetails {
   int? functionAssignId;
   int? clientUserId;
   String? clientUserName;
-  String? eventId;
+  int? eventId;
   String? eventName;
-  String? functionId;
+  int? functionId;
   String? functionName;
   String? startTime;
   String? endTime;
@@ -75,9 +75,9 @@ class FunctionManagerAssignDetails {
     functionAssignId = json['functionAssignId'];
     clientUserId = json['clientUserId'];
     clientUserName = json['clientUserName'];
-    eventId = json['eventId']?.toString();
+    eventId = json['eventId'];
     eventName = json['eventName'];
-    functionId = json['functionId']?.toString();
+    functionId = json['functionId'];
     functionName = json['functionName'];
     startTime = json['startTime'];
     endTime = json['endTime'];

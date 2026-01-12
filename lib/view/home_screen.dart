@@ -24,37 +24,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey<ScaffoldState>();
-final FunctionController functionController = Get.put(FunctionController());
-  final CategoryyController categoryyController = Get.put(CategoryyController());
+
+  final FunctionController functionController = Get.put(FunctionController());
   final EventMenuController eventMenuController = Get.put(EventMenuController());
-  late final OrderHistoryController historyController;
-
-  // final OrderHistoryController historyController = Get.put(OrderHistoryController(isCaptain:true));
-
+  final CategoryyController categoryyController = Get.put(CategoryyController());
+  OrderHistoryController get orderHistoryController => Get.find<OrderHistoryController>();
 
   @override
   void initState() {
     super.initState();
     _setupListeners();
-    historyController=Get.put(OrderHistoryController(isCaptain: true));
+
   }
   void _setupListeners() {
-    ever<FunctionManagerAssignDetails?>(
-        functionController.selectedFunction, (selectedFunction) {
+    ever(functionController.selectedFunction, (selectedFunction) {
       if (selectedFunction == null) return;
 
       final auth = Get.find<AuthController>();
-      final String clienUserId = auth.user.value?.clientUserId?.toString() ?? "504";
+      final clientuserId = auth.user.value?.clientUserId ?? 504;
 
       final String eventId = selectedFunction.eventId?.toString() ?? "0";
       final String functionId = selectedFunction.functionId?.toString() ?? "0";
 
-      if(eventId=="0"|| functionId=="0") return;
-
-
+      if (eventId == "0" || functionId == "0") return;
       categoryyController.fetchApiData(eventId, functionId);
-      eventMenuController.fetchTables(clienUserId,eventId,functionId);
-      historyController.updateContext( eventId: eventId, functionId: functionId, clientUserId: clienUserId);
+      eventMenuController.fetchTables(clientuserId, eventId, functionId);
     });
   }
 
@@ -97,12 +91,10 @@ final FunctionController functionController = Get.put(FunctionController());
 
           Obx(() {
             final categories = categoryyController.categories;
-            if (categoryyController.isLoading.value ?? false) {
+            if (categoryyController.isLoading.value) {
               return const SizedBox(height: 100,
                   child: Center(child: CircularProgressIndicator()));
             }
-            if (categoryyController==null)
-              return const SizedBox(height: 100,);
 
             return SizedBox(
               height: 100,
@@ -112,9 +104,9 @@ final FunctionController functionController = Get.put(FunctionController());
                 itemBuilder: (context, index) {
                   final category = categories[index];
                   return Obx(() {
-                    bool isSelected = categoryyController.selectedCategoryId.value == category.id;
+                    bool isSelected = categoryyController.selectedCategoryId.value == category?.id;
                     return GestureDetector(
-                      onTap: () => categoryyController.selectedCategoryId.value = category.id ?? 0,
+                      onTap: () => categoryyController.selectedCategoryId.value = category?.id ?? 0,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Column(
@@ -124,7 +116,7 @@ final FunctionController functionController = Get.put(FunctionController());
                               width: 60,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white, // Taki loader ke piche white background rahe
+                                color: Colors.white,
                                 border: Border.all(
                                   color: isSelected ? Colors.red : Colors.grey.shade300,
                                   width: 2,
@@ -133,8 +125,8 @@ final FunctionController functionController = Get.put(FunctionController());
                               child: Padding(
                                 padding: const EdgeInsets.all(3.0),
                                 child: ClipOval(
-                                  child: (category.menuImage != null &&
-                                      category.menuImage!.isNotEmpty)
+                                  child: (category?.menuImage != null &&
+                                      category!.menuImage!.isNotEmpty)
                                       ? Image.network(
                                     category.menuImage!,
                                     fit: BoxFit.cover,
@@ -160,7 +152,7 @@ final FunctionController functionController = Get.put(FunctionController());
                             ),
                             const SizedBox(height: 5),
                             Text(
-                              category.menuname ?? "",
+                              category?.menuname ?? "",
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -182,7 +174,8 @@ final FunctionController functionController = Get.put(FunctionController());
                       ),
                     );
                   });
-                  },
+
+                },
               ),
             );
           }),
@@ -191,10 +184,10 @@ final FunctionController functionController = Get.put(FunctionController());
           Expanded(
             child: Obx(() {
               final items = categoryyController.itemsByCategoryId[categoryyController.selectedCategoryId.value] ?? [];
-
               if (categoryyController.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
+
               return ResponsiveDiffLayout(
                 MobileBody: _buildItemsGrid(items),
                 TabletBody: _buildItemsList(items),
@@ -208,12 +201,17 @@ final FunctionController functionController = Get.put(FunctionController());
         if (!Get.isRegistered<EventMenuController>()) {
           return const SizedBox.shrink();
         }
+
         final menuCtrl = Get.find<EventMenuController>();
+
         final quantitiesMap = menuCtrl.quantities;
+
         final totalItems = quantitiesMap.values.fold(0, (sum, qty) => sum + qty);
+
         if (totalItems <= 0) {
           return const SizedBox.shrink();
         }
+
         return SafeArea(
           child: CartBottomBar(
             totalItems: totalItems,
@@ -315,7 +313,6 @@ final FunctionController functionController = Get.put(FunctionController());
                   color: Colors.white.withOpacity(0.2), // Light tint
                 ),
               ),
-
             ]),
         actions: [
           Align(
@@ -362,7 +359,7 @@ final FunctionController functionController = Get.put(FunctionController());
   void _openFunctionSelectorDialog() {
     final tempSelected =
     Rx<FunctionManagerAssignDetails?>(
-      functionController.selectedFunction.value,
+      functionController?.selectedFunction.value,
     );
     Get.dialog(
       Center(
@@ -391,14 +388,14 @@ final FunctionController functionController = Get.put(FunctionController());
                     child: Obx(() => ListView.builder(
                       shrinkWrap: true,
                       itemCount:
-                      functionController.functionList.length,
+                      functionController?.functionList.length,
                       itemBuilder: (_, index) {
                         final item =
-                        functionController.functionList[index];
+                        functionController?.functionList[index];
 
                         final isSelected =
                             tempSelected.value?.functionId ==
-                                item.functionId;
+                                item?.functionId;
 
                         return InkWell(
                           onTap: () => tempSelected.value = item,
@@ -423,21 +420,21 @@ final FunctionController functionController = Get.put(FunctionController());
                                     CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Event Name : ${item.eventName ?? ''}",
+                                        "Event Name : ${item?.eventName ?? ''}",
                                         style: GoogleFonts.nunito(
                                             fontWeight:
                                             FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Function Name : ${item.functionName ?? ''}",
+                                        "Function Name : ${item?.functionName ?? ''}",
                                         style:
                                         GoogleFonts.nunito( fontWeight:
                                         FontWeight.w600),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        "Date : ${formatDate(item.startTime)}",
+                                        "Date : ${formatDate(item?.startTime)}",
                                         style: GoogleFonts.nunito(
                                             fontWeight: FontWeight.w600                                        ),
                                       ),
@@ -491,11 +488,6 @@ final FunctionController functionController = Get.put(FunctionController());
                             ),
                           ),
                           onPressed: (){
-                            if (tempSelected.value != null) {
-                              functionController.onFunctionChanged(tempSelected.value);
-
-                              print("Selected Event: ${tempSelected.value!.eventId}");
-                            }
                             Get.back();
                           },
                           child: const Text("Done"),

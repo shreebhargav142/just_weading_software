@@ -28,7 +28,6 @@ class PdfController extends GetxController {
       localPdfPath.value = filePath;
       isLoading(false);
     } on DioException catch (e) {
-      // This will catch specific Dio errors
       if (e.type == DioExceptionType.connectionTimeout) {
         errorMessage.value = "Connection timeout. Check your internet.";
       } else if (e.response?.statusCode == 404) {

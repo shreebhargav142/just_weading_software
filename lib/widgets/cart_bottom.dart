@@ -74,6 +74,7 @@ class _CartBottomBarState extends State<CartBottomBar> {
 
           ElevatedButton(
             onPressed: ()=>_showTableSelectionDialog(context),
+
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD62E38),
               elevation: 0,

@@ -70,10 +70,14 @@ class ApiService {
    // * itemdetailsbyeventidfunctionid
   static Future<CategoryResponse?> fetchMenuData(String eventId, String functionId) async {
     final url = Uri.parse("https://justwedding.in/WS/getitemdetailsbyeventandfunctionid/$eventId/$functionId");
+
+    // STEP 1: Exact URL Print karein
     debugPrint("Hitting URL: $url");
 
     try {
       final response = await http.get(url);
+
+      // STEP 2: Raw Response Body Print karein
       debugPrint("Raw Response: ${response.body}");
 
       if (response.statusCode == 200) {
@@ -90,7 +94,7 @@ class ApiService {
     return null;
   }  // 4. fetch function
 
-  Future<FunctionModel?> fetchFunction(String clientUserId) async {
+  Future<FunctionModel?> fetchFunction(dynamic clientUserId) async {
     var url = Uri.parse(
         "https://justwedding.in/WS/getfunctionmanagerassignbyclientId/$clientUserId/");
 
@@ -124,7 +128,7 @@ class ApiService {
   }
 
   // 5 getTable
-  Future<List<dynamic>?> getAssignedTables(String clientUserId, String eventId,
+  Future<List<dynamic>?> getAssignedTables(int clientUserId, String eventId,
       String functionId) async {
     var url = Uri.parse(
         "$baseUrl/getmanagertableassignbyclientandfunctionid/$clientUserId/$eventId/$functionId/");
@@ -237,8 +241,8 @@ class ApiService {
 
   // 8 GetOrderHistoryByStatus
 
-  Future<OrderHistoryModel?> getOrderHistoryByStatus(String clientUserId,
-      String eventId, String functionId, String status) async {
+  Future<OrderHistoryModel?> getOrderHistoryByStatus(int clientUserId,
+      int eventId, int functionId, String status) async {
     var url = Uri.parse(
         "$baseUrl/getordertablebystatusandeventandfunctionid/$clientUserId/$eventId/$functionId/$status/");
     print("Final API URL: $url");

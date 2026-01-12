@@ -18,8 +18,9 @@ class CategoryList extends StatefulWidget {
   State<CategoryList> createState() => _CategoryListState();
 }
 class _CategoryListState extends State<CategoryList> {
-  // Use find instead of put if it's already initialized in HomeScreen
   late final CategoryyController controller = Get.find<CategoryyController>();
+  bool _initialSelectionDone = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +29,26 @@ class _CategoryListState extends State<CategoryList> {
 
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator(color: Colors.red));
+        return const Center(
+          child: CircularProgressIndicator(color: Colors.red),
+        );
       }
+
       if (controller.categories.isEmpty) {
         return const Center(child: Text("No categories found"));
+      }
+
+      // 🔥 IMPORTANT FIX
+      if (!_initialSelectionDone &&
+          controller.selectedCategoryId.value != 0) {
+        _initialSelectionDone = true;
+
+        final firstCategory = controller.categories.first;
+
+        // Notify parent AFTER first frame
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.onCategorySelected(firstCategory);
+        });
       }
 
       return SizedBox(
@@ -39,12 +56,14 @@ class _CategoryListState extends State<CategoryList> {
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: EdgeInsets.symmetric(
-              horizontal: isTablet ? 24 : 16,
-              vertical: 10
+            horizontal: isTablet ? 24 : 16,
+            vertical: 10,
           ),
           itemCount: controller.categories.length,
-          separatorBuilder: (_, __) => SizedBox(width: isTablet ? 30 : 20),
-          itemBuilder: (context, index) => _buildCategoryItem(index, isTablet),
+          separatorBuilder: (_, __) =>
+              SizedBox(width: isTablet ? 30 : 20),
+          itemBuilder: (context, index) =>
+              _buildCategoryItem(index, isTablet),
         ),
       );
     });

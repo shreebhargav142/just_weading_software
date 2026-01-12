@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:just_weding_software/view/auth/login_screen.dart';
 import 'package:just_weding_software/widgets/create_captain_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../controller/auth_controller.dart';

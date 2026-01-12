@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,7 +25,7 @@ class EventMenuController extends GetxController {
   final isPlacingOrder = false.obs;
 
   final AuthController authController = Get.find<AuthController>();
-  final FunctionController functionController = Get.find<FunctionController>();
+  final FunctionController functionController = Get.put(FunctionController());
 
   @override
   void onInit() {
@@ -34,7 +33,7 @@ class EventMenuController extends GetxController {
   }
   Future<void> loadEventMenu() async {
     final clientUserId =
-    authController.user.value?.clientUserId?.toString();
+    authController.user.value?.clientUserId;
     final eventId =
     functionController.selectedFunction.value?.eventId?.toString();
     final functionId =
@@ -53,7 +52,7 @@ class EventMenuController extends GetxController {
   }
 
   Future<void> fetchTables(
-      String clientUserId,
+      int clientUserId,
       String eventId,
       String functionId,
       ) async {

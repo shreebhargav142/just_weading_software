@@ -91,11 +91,10 @@ class AuthController extends GetxController {
     }
   }
 
-  // --- LOGOUT FUNCTION ---
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.clear(); // Saara data ek sath clear karein (Safe logic)
+      await prefs.clear();
 
       usernameController.clear();
       passwordController.clear();
@@ -110,4 +109,3 @@ class AuthController extends GetxController {
     }
   }
 }
-
